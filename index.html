@@ -4,20 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Pro Volleyball Neon Scoreboard</title>
+<title>Pro Volleyball Scoreboard</title>
 <style>
 :root {
-  /* Default Colors (Changeable in App) */
   --bg-left: #4ade80; 
   --bg-right: #f87171; 
-  
   --text-light: #ffffff;
   --pill-bg: rgba(255, 255, 255, 0.95);
   --pill-shadow: 0 8px 16px rgba(0,0,0,0.3);
   --icon-color: #374151;
   --accent: #22d3a7;
-  
-  /* Dynamic Streak Glow Variables */
   --streak-glow-a: 0px;
   --streak-glow-b: 0px;
 }
@@ -35,40 +31,34 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .hidden { display: none !important; }
 
 /* =======================================================
-   FORCE LANDSCAPE CSS
+   FORCE LANDSCAPE CSS (FOR MAIN APP ONLY)
    ======================================================= */
-#app-wrapper {
+#main-app-wrapper {
   position: absolute; top: 0; left: 0;
   width: 100vw; height: 100vh; overflow: hidden; background: #000;
   display: flex; flex-direction: column;
 }
 
 /* =======================================================
-   TEXT SIZES - (YAHAN SE AAP SIZE CHANGE KAR SAKTE HAIN)
+   TEXT SIZES - (Height badhaiyeko chha)
    ======================================================= */
-/* Landscape View (PC/Tablet) ke liye Text Size */
+/* Landscape View (PC/Tablet) */
 .score { 
-  font-size: 28vw; /* MAIN SCORE SIZE (Isko 25vw ya 35vw karke dekhein) */
-  font-weight: 900; color: white; line-height: 1; 
+  font-size: 45vw; /* Badhaiyeko size */
+  font-weight: 900; color: white; line-height: 0.8; 
   transition: text-shadow 0.3s ease, transform 0.1s;
 }
-.player-name { 
-  font-size: 8vw; /* TEAM NAME SIZE */
-}
+.player-name { font-size: 8vw; }
 
-/* Portrait View (Mobile force-landscape) ke liye Text Size */
+/* Portrait View (Mobile force-landscape) */
 @media screen and (orientation: portrait) {
-  #app-wrapper {
+  #main-app-wrapper {
     width: 100vh; height: 100vw;
     top: 0; left: 100vw;
     transform: rotate(90deg); transform-origin: top left;
   }
-  .score { 
-    font-size: 38vh; /* MOBILE PAR MAIN SCORE SIZE (Isko badal kar fit karein) */
-  }
-  .player-name { 
-    font-size: 8vh;  /* MOBILE PAR TEAM NAME SIZE */
-  }
+  .score { font-size: 50vh; } /* Badhaiyeko size */
+  .player-name { font-size: 8vh; }
 }
 
 /* ---------- MAIN SPLIT SCREEN APP ---------- */
@@ -82,24 +72,30 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .side-left { background-color: var(--bg-left); }
 .side-right { background-color: var(--bg-right); }
 
-/* Serving Indicator */
-.serve-indicator { position: absolute; top: 5%; font-size: 2.5rem; opacity: 0; transition: 0.3s; z-index: 10;}
+/* Ball / Serve Indicator - Position changed to side */
+.serve-indicator { 
+  position: absolute; 
+  top: 15%; 
+  font-size: 3rem; 
+  opacity: 0; 
+  transition: 0.3s; 
+  z-index: 10;
+}
+.side-left .serve-indicator { right: 10%; }
+.side-right .serve-indicator { left: 10%; }
 .serving .serve-indicator { opacity: 1; animation: bounce 1s infinite alternate; }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
-/* Player Info with Neon Glow */
+/* Player Info */
 .player-info { text-align: center; color: white; position: absolute; top: 3%; z-index: 5; width: 100%; }
 .player-name { 
   font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
   animation: neon-pulse 1.5s infinite alternate;
   text-shadow: 0 0 5px #fff, 0 0 15px rgba(255,255,255,0.7);
 }
-@keyframes neon-pulse {
-  0% { opacity: 0.8; }
-  100% { opacity: 1; transform: scale(1.02); }
-}
+@keyframes neon-pulse { 0% { opacity: 0.8; } 100% { opacity: 1; transform: scale(1.02); } }
 
-/* Fixed Huge Score Text with Streak Glow (White glow for any BG) */
+/* Score Text */
 .score-box { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .score:active { transform: scale(0.95); }
 .score-left-glow { text-shadow: 0 0 var(--streak-glow-a) #fff, 0 0 calc(var(--streak-glow-a) * 1.5) #fff, 0 10px 20px rgba(0,0,0,0.5); }
@@ -112,136 +108,158 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   box-shadow: var(--pill-shadow); display: flex; align-items: center; justify-content: center; z-index: 50; 
 }
 
-/* Center Set Pill (Top) */
+/* Center Set Pill (Top) - Only Set number */
 .center-sets { 
   top: 15px; padding: 10px 25px; border-radius: 30px; 
   text-align: center; background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 4px 10px rgba(0,0,0,0.2);
 }
-#current-set-label { font-size: 1.2rem; font-weight: 900; color: #111827; letter-spacing: 1px;}
-.target-score-info { font-size: 0.8rem; color: #4b5563; font-weight: 800; }
+#current-set-label { font-size: 1.5rem; font-weight: 900; color: #111827; letter-spacing: 1px;}
 
-/* =======================================================
-   CENTER SETS WON (YELLOW BOX AREA)
-   YAHAN SE SET WIN KA TEXT SIZE BADLEIN
-   ======================================================= */
+/* CENTER SETS WON */
 .sets-won-center {
   top: 50%; left: 50%; transform: translate(-50%, -50%);
   flex-direction: column; padding: 10px 25px; border-radius: 20px;
   background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2);
   box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 60;
-  
-  /* SET WIN AREA OVERALL SIZE: */
-  font-size: 2.9rem; /* Isko kam/zyada karein box ka size chhota/bada karne ke liye */
+  font-size: 2.9rem; 
 }
 .sets-won-title { font-size: 0.6em; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
 .sets-won-scores { font-weight: 900; font-size: 1.2em; display: flex; gap: 15px; align-items: center;}
 .set-score-a { color: var(--bg-left); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 .set-score-b { color: var(--bg-right); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
-
 /* Bottom Menu Pill */
 .bottom-controls { bottom: 15px; padding: 10px 25px; gap: 25px; }
 .bottom-controls button { font-size: 1.5rem; color: var(--icon-color); transition: 0.2s; font-weight: 900;}
 .bottom-controls button:active { transform: scale(0.85); }
 
-/* ---------- OVERLAYS (Setup, Modals) ---------- */
-.overlay { 
+/* ---------- OVERLAYS ---------- */
+#setup-screen {
+  position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; 
+  padding: 20px; background: rgba(0,0,0,.95); 
+}
+
+.app-overlay { 
   position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; 
   padding: 20px; background: rgba(0,0,0,.85); backdrop-filter: blur(8px); 
 }
+
 .box { 
   width: 100%; max-width: 440px; color: white; background: #111827; 
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 25px; 
-  box-shadow: 0 20px 50px rgba(0,0,0,.9); 
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px 20px; 
+  box-shadow: 0 20px 50px rgba(0,0,0,.9); max-height: 90%; overflow-y: auto; scrollbar-width: none; 
 }
-.modal-title { text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 20px; color: var(--accent); text-transform: uppercase;}
-.field { margin-bottom: 15px; }
-.field > label { display: block; margin-bottom: 8px; font-size: .8rem; font-weight: 800; color: #9ca3af; text-transform: uppercase;}
-.field select { 
-  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); 
-  background: rgba(0,0,0,0.3); color: white; font-size: 1rem; font-weight: bold; outline: none; 
-}
+.box::-webkit-scrollbar { display: none; } 
 
-/* Color Picker & Name Row */
-.color-picker-row { display: flex; gap: 10px; }
-.color-picker-row input[type=text] { 
-  flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); 
-  background: rgba(0,0,0,0.3); color: white; font-size: 1rem; font-weight: bold; outline: none; 
+.modal-title { text-align: center; font-size: 1.2rem; font-weight: 900; margin-bottom: 15px; color: var(--accent); text-transform: uppercase;}
+.field { margin-bottom: 10px; }
+.field > label { display: block; margin-bottom: 5px; font-size: .75rem; font-weight: 800; color: #9ca3af; text-transform: uppercase;}
+.field select, .color-picker-row input[type=text] { 
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); 
+  background: rgba(0,0,0,0.3); color: white; font-size: 0.95rem; font-weight: bold; outline: none; 
 }
+.color-picker-row { display: flex; gap: 8px; }
 .color-picker-row input[type=color] { 
-  width: 50px; height: 100%; min-height: 46px; border: none; border-radius: 12px; 
+  width: 45px; height: 100%; min-height: 40px; border: none; border-radius: 10px; 
   cursor: pointer; background: transparent; 
 }
 .color-picker-row input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
-.color-picker-row input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; }
+.color-picker-row input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; }
 
-.team-inputs { display: flex; flex-direction: column; gap: 12px; }
-.segmented { display: flex; gap: 5px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,0.2); }
-.segmented button { flex: 1; padding: 11px 6px; border-radius: 10px; font-size: .85rem; font-weight: 800; color: #9ca3af; transition: 0.2s;}
+.team-inputs { display: flex; flex-direction: column; gap: 8px; }
+.segmented { display: flex; gap: 5px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,0.2); }
+.segmented button { flex: 1; padding: 10px 4px; border-radius: 8px; font-size: .8rem; font-weight: 800; color: #9ca3af; transition: 0.2s;}
 .segmented button.active { background: var(--accent); color: #000; box-shadow: 0 0 10px rgba(34, 211, 167, 0.5);}
-.btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:10px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
-.btn-primary:active { transform: scale(0.97); }
-.btn-ghost { width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; font-size: .9rem; font-weight: 800;}
+.btn-primary { width: 100%; padding: 12px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:5px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
+.btn-ghost { width: 100%; padding: 10px; border-radius: 12px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; font-size: .85rem; font-weight: 800;}
+
+/* Guide Overlay */
+#guide-overlay {
+  position: absolute; inset: 0; z-index: 200; 
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+  display: flex; flex-direction: column;
+}
+.guide-pointer {
+  position: absolute; color: white; font-weight: bold; text-shadow: 0 2px 4px black;
+  display: flex; flex-direction: column; align-items: center;
+}
+.guide-arrow { font-size: 2rem; color: #facc15; animation: point 1s infinite alternate; }
+@keyframes point { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.guide-text { background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; border: 1px solid #facc15; text-align: center; font-size: 0.9rem;}
+.close-guide-btn {
+  position: absolute; top: 20px; right: 20px; background: red; color: white; 
+  border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; 
+  font-weight: bold; cursor: pointer; z-index: 210; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* History Modal */
+#history-list-container { max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px;}
+.history-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; font-size: 0.9rem;}
 </style>
 </head>
 <body>
 
-<div id="app-wrapper">
-
-  <!-- ============ SETUP SCREEN (First Screen) ============ -->
-  <div id="setup-screen" class="overlay">
-    <div class="box">
-      <div class="modal-title">Volleyball Match Setup</div>
-      
-      <div class="team-inputs">
-        <div class="field">
-          <label>Team 1 Name & Color</label>
-          <div class="color-picker-row">
-            <input type="text" id="setup-a-name" value="TEAM 1" maxlength="12" autocomplete="off">
-            <input type="color" id="setup-a-color" value="#4ade80">
-          </div>
-        </div>
-        <div class="field">
-          <label>Team 2 Name & Color</label>
-          <div class="color-picker-row">
-            <input type="text" id="setup-b-name" value="TEAM 2" maxlength="12" autocomplete="off">
-            <input type="color" id="setup-b-color" value="#f87171">
-          </div>
-        </div>
-      </div>
-      
-      <div class="field" style="margin-top: 10px;">
-        <label>Match Format</label>
-        <div class="segmented" id="format-seg">
-          <button type="button" data-value="3">Best of 3</button>
-          <button type="button" data-value="5" class="active">Best of 5</button>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Final Set Target Score</label>
-        <select id="setup-target">
-          <option value="15">Play to 15 (Standard)</option>
-          <option value="25">Play to 25</option>
-        </select>
-      </div>
-
-      <button class="btn-primary" id="btn-start">Start Match 🚀</button>
-    </div>
-  </div>
-  
-  <!-- ============ MAIN UI APP ============ -->
-  <div id="main-app" class="hidden">
+<!-- ============ SETUP SCREEN ============ -->
+<div id="setup-screen">
+  <div class="box">
+    <div class="modal-title">Volleyball Match Setup</div>
     
+    <button class="btn-ghost" id="btn-show-history" style="margin-bottom: 15px;">📜 Match History Herna</button>
+
+    <div id="setup-history-area" class="hidden">
+      <div id="history-list-container"></div>
+      <button class="btn-ghost" id="btn-hide-history" style="border-color: red; color: red;">X Banda Garna</button>
+    </div>
+
+    <div class="team-inputs">
+      <div class="field">
+        <label>Team 1 Name & Color</label>
+        <div class="color-picker-row">
+          <input type="text" id="setup-a-name" value="TEAM 1" maxlength="12" autocomplete="off">
+          <input type="color" id="setup-a-color" value="#4ade80">
+        </div>
+      </div>
+      <div class="field">
+        <label>Team 2 Name & Color</label>
+        <div class="color-picker-row">
+          <input type="text" id="setup-b-name" value="TEAM 2" maxlength="12" autocomplete="off">
+          <input type="color" id="setup-b-color" value="#f87171">
+        </div>
+      </div>
+    </div>
+    
+    <div class="field" style="margin-top: 10px;">
+      <label>Match Format</label>
+      <div class="segmented" id="format-seg">
+        <button type="button" data-value="3">Best of 3</button>
+        <button type="button" data-value="5" class="active">Best of 5</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Final Set Target Score</label>
+      <select id="setup-target">
+        <option value="15">Play to 15</option>
+        <option value="25">Play to 25</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" id="btn-start">Start Match 🚀</button>
+  </div>
+</div>
+
+<!-- ============ MAIN UI APP ============ -->
+<div id="main-app-wrapper" class="hidden">
+  
+  <div id="main-app">
     <!-- Top Center Set Info -->
     <div class="floating-pill center-sets">
       <div id="current-set-label">SET 1</div>
-      <div class="target-score-info" id="target-info">To 25 (Win by 2)</div>
     </div>
 
-    <!-- CENTER SETS WON PILL (Yellow Box Area) -->
-    <div class="floating-pill sets-won-center">
+    <!-- CENTER SETS WON PILL -->
+    <div class="floating-pill sets-won-center" id="sets-won-ui">
       <div class="sets-won-title">SETS WON</div>
       <div class="sets-won-scores">
         <span class="set-score-a" id="sets-a">0</span> 
@@ -273,29 +291,58 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     </div>
 
     <!-- Floating Bottom Controls -->
-    <div class="floating-pill bottom-controls">
+    <div class="floating-pill bottom-controls" id="bottom-ui">
       <button id="btn-settings" title="Settings">⚙️</button>
       <button id="btn-undo" title="Undo">↩</button>
-      <button id="btn-sub-a" title="Minus T1 Point" style="color:var(--icon-color); font-weight:800">-1</button>
-      <button id="btn-sub-b" title="Minus T2 Point" style="color:var(--icon-color); font-weight:800">-1</button>
+      <button id="btn-sub-a" title="Minus Left Point" style="color:var(--icon-color); font-weight:800">-1 Left</button>
+      <button id="btn-sub-b" title="Minus Right Point" style="color:var(--icon-color); font-weight:800">-1 Right</button>
       <button id="btn-reset" title="Reset Match">🔄</button>
     </div>
   </div>
 
+  <!-- ============ INTERACTIVE GUIDE OVERLAY ============ -->
+  <div id="guide-overlay" class="hidden">
+    <button class="close-guide-btn" id="btn-close-guide">X</button>
+    
+    <!-- Guide for Team 1 Click -->
+    <div class="guide-pointer" style="top: 30%; left: 15%;">
+      <div class="guide-text">यता थिच्दा टिम १ को स्कोर बढ्छ</div>
+      <div class="guide-arrow">↓</div>
+    </div>
+    
+    <!-- Guide for Team 2 Click -->
+    <div class="guide-pointer" style="top: 30%; right: 15%;">
+      <div class="guide-text">यता थिच्दा टिम २ को स्कोर बढ्छ</div>
+      <div class="guide-arrow">↓</div>
+    </div>
+    
+    <!-- Guide for Set Won -->
+    <div class="guide-pointer" style="top: 30%; left: 45%;">
+      <div class="guide-text">जम्मा जितेको सेट</div>
+      <div class="guide-arrow">↓</div>
+    </div>
+
+    <!-- Guide for Bottom Controls -->
+    <div class="guide-pointer" style="bottom: 20%; left: 40%;">
+      <div class="guide-arrow">↓</div>
+      <div class="guide-text">सेटिङ्ग, अनडु(ब्याक), पोइन्ट घटाउन र रिसेट गर्न तलको बटन थिच्नुहोस</div>
+    </div>
+  </div>
+
   <!-- ============ SETTINGS MODAL ============ -->
-  <div id="modal-settings" class="overlay hidden">
+  <div id="modal-settings" class="app-overlay hidden">
     <div class="box">
       <div class="modal-title">Match Settings</div>
       <div class="team-inputs">
         <div class="field">
-          <label>Team 1 Name & Color</label>
+          <label>Left Team Name & Color</label>
           <div class="color-picker-row">
             <input type="text" id="settings-a-name" maxlength="12" autocomplete="off">
             <input type="color" id="settings-a-color">
           </div>
         </div>
         <div class="field">
-          <label>Team 2 Name & Color</label>
+          <label>Right Team Name & Color</label>
           <div class="color-picker-row">
             <input type="text" id="settings-b-name" maxlength="12" autocomplete="off">
             <input type="color" id="settings-b-color">
@@ -309,18 +356,21 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
           <option value="25">Play to 25</option>
         </select>
       </div>
+      
+      <button class="btn-ghost" id="btn-show-guide" style="border-color: #facc15; color: #facc15;">📖 App Guide Herna Click</button>
+
       <button class="btn-primary" id="btn-save-settings">Save & Resume</button>
       <button class="btn-ghost" id="btn-cancel-settings">Cancel</button>
     </div>
   </div>
 
   <!-- ============ MATCH OVER MODAL ============ -->
-  <div id="modal-set" class="overlay hidden">
+  <div id="modal-set" class="app-overlay hidden">
     <div class="box" style="text-align:center;">
       <div class="modal-title" id="modal-title">Set Complete</div>
       <div style="font-size: 3.5rem; font-weight: 900; margin: 15px 0;" id="modal-score">25 – 23</div>
       <div style="font-size: 1.2rem; font-weight: 800;" id="modal-desc">Team 1 wins the set!</div>
-      <button class="btn-primary" id="btn-next-set">Start Next Set</button>
+      <button class="btn-primary" id="btn-next-set">Start Next Set (Swap Sides)</button>
       <button class="btn-ghost" id="btn-undo-modal">↩ Undo Last Point</button>
     </div>
   </div>
@@ -331,12 +381,15 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 (function () {
   'use strict';
 
-  // Load Saved Data from LocalStorage
+  // Load Saved Data
   document.getElementById('setup-a-name').value = localStorage.getItem('vb_teamA') || 'TEAM 1';
   document.getElementById('setup-b-name').value = localStorage.getItem('vb_teamB') || 'TEAM 2';
   document.getElementById('setup-a-color').value = localStorage.getItem('vb_colorA') || '#4ade80';
   document.getElementById('setup-b-color').value = localStorage.getItem('vb_colorB') || '#f87171';
   document.getElementById('setup-target').value = localStorage.getItem('vb_target') || '15';
+
+  // Match History System
+  let allMatchesHistory = JSON.parse(localStorage.getItem('vb_match_history')) || [];
 
   // State
   let selectedFormat = 5; 
@@ -354,16 +407,16 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
   const els = {
     setupScreen: document.getElementById('setup-screen'),
-    app: document.getElementById('main-app'),
+    appWrapper: document.getElementById('main-app-wrapper'),
     modalSet: document.getElementById('modal-set'),
     modalSettings: document.getElementById('modal-settings'),
+    guideOverlay: document.getElementById('guide-overlay'),
     
     sideA: document.getElementById('side-a'), sideB: document.getElementById('side-b'),
     nameA: document.getElementById('name-a'), nameB: document.getElementById('name-b'),
     scoreA: document.getElementById('score-a'), scoreB: document.getElementById('score-b'),
     setsA: document.getElementById('sets-a'), setsB: document.getElementById('sets-b'),
     currentSet: document.getElementById('current-set-label'),
-    targetInfo: document.getElementById('target-info'),
     
     // Setup inputs
     inputSetupA: document.getElementById('setup-a-name'),
@@ -379,6 +432,28 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     inputSettingsColorB: document.getElementById('settings-b-color'),
     inputSettingsTarget: document.getElementById('settings-target')
   };
+
+  // Setup History Toggle
+  document.getElementById('btn-show-history').addEventListener('click', () => {
+    let container = document.getElementById('history-list-container');
+    if(allMatchesHistory.length === 0){
+      container.innerHTML = "<p style='text-align:center;'>Kunai pani history chhaina.</p>";
+    } else {
+      container.innerHTML = allMatchesHistory.map(m => 
+        `<div class="history-item">
+          <span>${m.teamA} vs ${m.teamB}</span>
+          <span style="color:var(--accent); font-weight:bold;">${m.setsA} - ${m.setsB}</span>
+        </div>`
+      ).join('');
+    }
+    document.getElementById('setup-history-area').classList.remove('hidden');
+    document.getElementById('btn-show-history').classList.add('hidden');
+  });
+
+  document.getElementById('btn-hide-history').addEventListener('click', () => {
+    document.getElementById('setup-history-area').classList.add('hidden');
+    document.getElementById('btn-show-history').classList.remove('hidden');
+  });
 
   // Setup Format toggle
   document.getElementById('format-seg').addEventListener('click', function(e) {
@@ -399,14 +474,11 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
     saveData();
     els.setupScreen.classList.add('hidden');
-    els.app.classList.remove('hidden');
+    els.appWrapper.classList.remove('hidden');
     render();
   });
 
-  function targetScore() { 
-    return state.currentSet === state.format ? state.finalTarget : 25; 
-  }
-  
+  function targetScore() { return state.currentSet === state.format ? state.finalTarget : 25; }
   function setsNeeded() { return Math.ceil(state.format / 2); }
 
   function saveData() {
@@ -417,12 +489,20 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     localStorage.setItem('vb_target', state.finalTarget);
   }
 
+  function saveMatchHistory() {
+    allMatchesHistory.push({
+      teamA: state.teamA, teamB: state.teamB,
+      setsA: state.setsA, setsB: state.setsB,
+      date: new Date().toLocaleString()
+    });
+    if(allMatchesHistory.length > 20) allMatchesHistory.shift();
+    localStorage.setItem('vb_match_history', JSON.stringify(allMatchesHistory));
+  }
+
   function updateVisuals() {
-    // Update Dynamic CSS Variables for colors
     document.documentElement.style.setProperty('--bg-left', state.colorA);
     document.documentElement.style.setProperty('--bg-right', state.colorB);
 
-    // Update Streak Glow effect (max glow limit)
     let glowA = Math.min(streakA * 8, 40);
     let glowB = Math.min(streakB * 8, 40);
     els.scoreA.style.setProperty('--streak-glow-a', glowA + 'px');
@@ -447,8 +527,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     els.scoreA.textContent = state.scoreA; els.scoreB.textContent = state.scoreB;
     els.setsA.textContent = state.setsA; els.setsB.textContent = state.setsB;
     
+    // Shows only SET 1 etc.
     els.currentSet.textContent = state.currentSet === state.format ? 'FINAL SET' : 'SET ' + state.currentSet;
-    els.targetInfo.textContent = 'To ' + targetScore() + ' (Win by 2)';
     
     els.sideA.classList.toggle('serving', state.server === 'A');
     els.sideB.classList.toggle('serving', state.server === 'B');
@@ -459,15 +539,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   function addPoint(side) {
     if (state.status !== 'playing') return;
     pushUndo();
-    
-    if (side === 'A') { 
-      state.scoreA++; state.server = 'A'; 
-      streakA++; streakB = 0;
-    } else { 
-      state.scoreB++; state.server = 'B'; 
-      streakB++; streakA = 0;
-    }
-    
+    if (side === 'A') { state.scoreA++; state.server = 'A'; streakA++; streakB = 0; } 
+    else { state.scoreB++; state.server = 'B'; streakB++; streakA = 0; }
     render(); checkWin();
   }
 
@@ -486,11 +559,13 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
     state.status = 'break';
     if (aWin) state.setsA++; else state.setsB++;
-    
-    streakA = 0; streakB = 0; // Reset streaks on set end
+    streakA = 0; streakB = 0; 
 
     const matchOver = state.setsA >= setsNeeded() || state.setsB >= setsNeeded();
-    if (matchOver) state.status = 'finished';
+    if (matchOver) {
+      state.status = 'finished';
+      saveMatchHistory();
+    }
 
     document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
     document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins!`;
@@ -501,7 +576,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
       document.getElementById('btn-next-set').onclick = goToSetup;
     } else {
       document.getElementById('modal-title').textContent = 'SET ' + state.currentSet + ' COMPLETE';
-      document.getElementById('btn-next-set').textContent = 'Start Next Set';
+      document.getElementById('btn-next-set').textContent = 'Start Next Set (Swap Sides)';
       document.getElementById('btn-next-set').onclick = startNextSet;
     }
     els.modalSet.classList.remove('hidden');
@@ -510,7 +585,14 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
   function startNextSet() {
     if (state.status !== 'break') return;
-    undoStack = []; state.currentSet++; state.scoreA = 0; state.scoreB = 0; state.status = 'playing';
+    undoStack = []; 
+    
+    // Swap Teams, Colors, and Sets Won
+    let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
+    let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
+    let tempSets = state.setsA; state.setsA = state.setsB; state.setsB = tempSets;
+    
+    state.currentSet++; state.scoreA = 0; state.scoreB = 0; state.status = 'playing';
     els.modalSet.classList.add('hidden'); render();
   }
 
@@ -519,23 +601,22 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     state.status = 'setup'; undoStack = []; streakA = 0; streakB = 0;
     
     els.modalSet.classList.add('hidden'); 
-    els.app.classList.add('hidden');
+    els.appWrapper.classList.add('hidden');
     els.setupScreen.classList.remove('hidden');
   }
 
-  // Bind Clicks
+  // Bind Game Clicks
   document.getElementById('click-a').addEventListener('click', () => addPoint('A'));
   document.getElementById('click-b').addEventListener('click', () => addPoint('B'));
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-undo-modal').addEventListener('click', undo);
   document.getElementById('btn-sub-a').addEventListener('click', () => subPoint('A'));
   document.getElementById('btn-sub-b').addEventListener('click', () => subPoint('B'));
-  
   document.getElementById('btn-reset').addEventListener('click', () => { 
     if(confirm('Are you sure you want to end this match and go back to setup?')) goToSetup(); 
   });
 
-  // Settings Menu (in-game changes)
+  // Settings Menu
   document.getElementById('btn-settings').addEventListener('click', () => {
     els.inputSettingsA.value = state.teamA;
     els.inputSettingsB.value = state.teamB;
@@ -559,6 +640,15 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     saveData();
     els.modalSettings.classList.add('hidden');
     render();
+  });
+
+  // Guide overlay logic
+  document.getElementById('btn-show-guide').addEventListener('click', () => {
+    els.modalSettings.classList.add('hidden');
+    els.guideOverlay.classList.remove('hidden');
+  });
+  document.getElementById('btn-close-guide').addEventListener('click', () => {
+    els.guideOverlay.classList.add('hidden');
   });
 
 })();
