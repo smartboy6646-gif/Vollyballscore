@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#070a12">
+<title>Volleyball Pro Scoreboard</title>
+<style>
+:root{--bg:#070a12;--line:rgba(255,255,255,.14);--glass:rgba(255,255,255,.08);--nf:clamp(18px,4.2dvh,42px);--gold:#ffd60a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);color:#fff;font-family:"SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulation}
+button:disabled{opacity:.35;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#app{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:radial-gradient(120% 80% at 50% 0%,#16203a 0%,var(--bg) 60%)}
+/* header */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:clamp(6px,1.4dvh,14px) 16px}
+.brand{font-weight:800;letter-spacing:.08em;font-size:clamp(11px,2dvh,18px);white-space:nowrap}
+.setno{font-weight:900;font-size:clamp(20px,4.2dvh,42px);letter-spacing:.06em;text-align:center}
+.time{justify-self:end;text-align:right;line-height:1.1}
+.time small{display:block;font-size:clamp(9px,1.4dvh,12px);letter-spacing:.14em;opacity:.65;font-weight:700}
+.time b{font-size:clamp(18px,3.4dvh,34px);font-weight:800;font-variant-numeric:tabular-nums}
+/* board */
+#board{position:relative;display:grid;gap:10px;padding:0 12px;min-height:0;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto minmax(0,1fr)}
+@media (orientation:landscape){#board{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:minmax(0,1fr)}}
+.panel{position:relative;order:1;display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-width:0;min-height:0;padding:clamp(10px,2dvh,20px) clamp(12px,2.4dvh,22px);border-radius:28px;border:2px solid var(--c);background:linear-gradient(155deg,var(--c1),var(--c2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 12px 40px rgba(0,0,0,.5);cursor:pointer;overflow:hidden;transition:transform .08s}
+.panel:active{transform:scale(.99)}
+.pTop{display:flex;align-items:center;gap:12px;min-width:0}
+.avatar{flex:none;width:clamp(38px,7dvh,64px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);border:2px solid var(--c);font-weight:900;font-size:clamp(16px,3dvh,28px)}
+.name{flex:1;min-width:0;font-weight:800;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:calc(var(--nf)*var(--k,1));text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.scoreWrap{position:relative;display:grid;place-items:center;min-height:0}
+.score{font-weight:900;line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.03em;font-size:min(23dvh,38vw);text-shadow:0 4px 0 rgba(0,0,0,.35),0 10px 36px rgba(0,0,0,.55)}
+@media (orientation:landscape){.score{font-size:min(38dvh,17vw)}}
+.bump{animation:bump .22s ease-out}
+@keyframes bump{30%{transform:scale(1.14)}}
+.plus{position:absolute;top:8%;right:14%;font-weight:900;font-size:clamp(22px,5dvh,48px);color:var(--gold);text-shadow:0 2px 10px rgba(0,0,0,.6);pointer-events:none;animation:rise .7s ease-out forwards}
+@keyframes rise{0%{opacity:0;transform:translateY(12px) scale(.8)}20%{opacity:1}100%{opacity:0;transform:translateY(-36px) scale(1.1)}}
+.pBot{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.serve{visibility:hidden;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;background:var(--gold);color:#111;font-weight:900;letter-spacing:.06em;font-size:clamp(12px,2dvh,18px)}
+.serve.on{visibility:visible}
+.serve.swap{animation:swap .45s ease-out}
+.serve.on .ball{display:inline-block;animation:bounce 1.1s infinite}
+@keyframes swap{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes bounce{50%{transform:translateY(-3px) rotate(180deg)}}
+.minus{min-width:52px;min-height:44px;padding:0 14px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line);font-weight:800;font-size:16px}
+/* middle */
+.mid{order:2;display:grid;gap:6px;justify-items:center;align-content:center;text-align:center;padding:2px 6px;grid-template-columns:1fr auto 1fr;grid-template-areas:"rule sets state" "call call call"}
+@media (orientation:landscape){.mid{grid-template-columns:1fr;grid-template-areas:"state" "sets" "call" "rule";width:clamp(150px,18vw,360px);gap:clamp(6px,2dvh,22px)}}
+#rule{grid-area:rule;justify-self:start;text-align:left;font-size:clamp(10px,1.7dvh,16px);opacity:.75;font-weight:600}
+@media (orientation:landscape){#rule{justify-self:center;text-align:center}}
+.sets{grid-area:sets}
+.sets small{display:block;font-size:clamp(9px,1.5dvh,13px);letter-spacing:.2em;opacity:.65;font-weight:700}
+.sets div{display:flex;align-items:center;gap:10px}
+.sets b{min-width:1.3em;padding-bottom:2px;border-bottom:4px solid var(--c,#fff);font-size:clamp(30px,6.6dvh,72px);font-weight:900;line-height:1}
+.sets i{font-style:normal;opacity:.5;font-size:clamp(20px,4dvh,40px)}
+#state{grid-area:state;justify-self:end;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:99px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-weight:800;letter-spacing:.1em;font-size:clamp(10px,1.7dvh,15px)}
+@media (orientation:landscape){#state{justify-self:center}}
+#state::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dot,#22c55e)}
+#state.live::before{animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+#call{grid-area:call;min-height:1px;padding:6px 16px;border-radius:14px;font-weight:900;letter-spacing:.05em;font-size:clamp(14px,2.8dvh,28px);line-height:1.15}
+#call small{display:block;font-size:.55em;letter-spacing:.1em;opacity:.8}
+#call:empty{display:none}
+#call.set{background:#ff7a00;color:#111}
+#call.match{background:var(--gold);color:#111;animation:pulse 1s infinite}
+#call.deuce,#call.win{background:var(--glass);border:1px solid var(--line)}
+/* pause */
+#pause{position:absolute;inset:0;z-index:5;display:grid;place-content:center;justify-items:center;gap:18px;border-radius:28px;background:rgba(7,10,18,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#pause h2{margin:0;font-size:clamp(40px,12dvh,120px);font-weight:900;letter-spacing:.1em}
+/* dock */
+.dock{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px;width:min(720px,calc(100% - 24px));margin:10px auto 12px;padding:8px;border-radius:26px;background:rgba(255,255,255,.09);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.dock button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:56px;border-radius:18px;background:transparent;font-size:clamp(10px,1.5dvh,13px);font-weight:700}
+.dock button:active:not(:disabled){background:rgba(255,255,255,.16)}
+.dock em{font-style:normal;font-size:clamp(18px,3dvh,24px);line-height:1}
+@media (orientation:landscape) and (max-height:500px){.dock{margin:4px auto 6px}.dock button{min-height:44px}.dock span{display:none}.top{padding:4px 16px}}
+/* modal */
+#modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:rgba(0,0,0,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#sheet{width:min(100%,460px);max-height:100%;overflow:auto;padding:22px;border-radius:28px;background:rgba(22,28,44,.94);border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.6);animation:pop .22s ease-out;text-align:center}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+#sheet h2{margin:0 0 8px;font-size:20px;letter-spacing:.06em}
+#sheet p{margin:6px 0;opacity:.8}
+.big{font-size:clamp(48px,14vw,76px);font-weight:900;font-variant-numeric:tabular-nums;margin:6px 0}
+.winl{font-weight:900;font-size:20px;letter-spacing:.04em;margin:4px 0 10px}
+.acts{display:grid;gap:10px;margin-top:18px}
+.btn{min-height:52px;padding:0 16px;border-radius:16px;background:var(--glass);border:1px solid var(--line);font-weight:800;letter-spacing:.03em}
+.btn.pri{background:var(--gold);color:#111;border-color:transparent}
+.btn.dng{background:#dc2626;border-color:transparent}
+.btn.on{background:#fff;color:#111}
+.hrow{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-weight:700;font-variant-numeric:tabular-nums}
+.set label,.lbl{display:block;margin:14px 0 6px;font-size:12px;letter-spacing:.12em;opacity:.7;text-align:left;font-weight:700}
+.team{display:grid;grid-template-columns:1fr 64px 52px;gap:8px;margin-bottom:8px}
+input[type=text]{min-width:0;height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font-size:16px;-webkit-user-select:text;user-select:text}
+input[type=color]{width:100%;height:48px;padding:2px;border-radius:12px;border:1px solid var(--line);background:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sw{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;font-weight:700}
+.sw input{appearance:none;-webkit-appearance:none;width:52px;height:30px;border-radius:99px;background:rgba(255,255,255,.2);position:relative;transition:.2s;flex:none}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked{background:#22c55e}.sw input:checked::after{transform:translateX(22px)}
+#toast{position:fixed;left:50%;bottom:calc(110px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;padding:10px 18px;border-radius:99px;background:rgba(0,0,0,.8);border:1px solid var(--line);font-weight:700;pointer-events:none;opacity:0;transition:opacity .2s}
+#toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">🏐 VOLLEYBALL PRO</div>
+    <div class="setno" id="setLabel">SET 1</div>
+    <div class="time"><small>MATCH TIME</small><b id="timer">00:00</b></div>
+  </header>
+  <main id="board">
+    <section class="panel" id="pA" data-t="a" role="button" tabindex="0"></section>
+    <div class="mid">
+      <div id="rule"></div>
+      <div class="sets"><small>SETS</small><div><b id="sL">0</b><i>–</i><b id="sR">0</b></div></div>
+      <div id="state">READY</div>
+      <div id="call"></div>
+    </div>
+    <section class="panel" id="pB" data-t="b" role="button" tabindex="0"></section>
+    <div id="pause" hidden><h2>PAUSED</h2><button class="btn pri" id="resumeBtn" style="min-width:200px;min-height:64px;font-size:20px">RESUME</button></div>
+  </main>
+  <nav class="dock" aria-label="Controls">
+    <button id="bUndo"><em>↶</em><span>Undo</span></button>
+    <button id="bSound"><em>🔊</em><span>Sound</span></button>
+    <button id="bPause"><em>⏸</em><span>Pause</span></button>
+    <button id="bHist"><em>📋</em><span>History</span></button>
+    <button id="bSet"><em>⚙️</em><span>Settings</span></button>
+  </nav>
+</div>
+<div id="modal" hidden><div id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast" role="status"></div>
+
+<script>
+(()=>{
+'use strict';
+/* ============ STATE ============ */
+const KEY='volleyballPro.v1', MAX_UNDO=150;
+const mk=(name,color,avatar)=>({name,color,avatar,score:0,sets:0});
+let S={t:{a:mk('TEAM A','#22c55e','A'),b:mk('TEAM B','#ef4444','B')},bestOf:3,setNo:1,server:'a',hist:[],over:false,pend:false,flip:false,auto:true,paused:false,started:false,elapsed:0,sound:true,vib:true};
+let undoStack=[], lastTick=Date.now(), prevServer=null, ac=null, modalDismiss=true, wake=null;
+
+/* ============ DOM REFERENCES ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const P={a:$('#pA'),b:$('#pB')};
+const E={set:$('#setLabel'),timer:$('#timer'),rule:$('#rule'),sL:$('#sL'),sR:$('#sR'),state:$('#state'),call:$('#call'),pause:$('#pause'),undo:$('#bUndo'),sound:$('#bSound'),pbtn:$('#bPause'),modal:$('#modal'),sheet:$('#sheet'),toast:$('#toast')};
+const other=t=>t==='a'?'b':'a';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nm=t=>(S.t[t].name.trim()||'Team '+t).toUpperCase();
+const shade=(h,k)=>{const n=parseInt(h.slice(1),16);return `rgb(${((n>>16)&255)*k|0},${((n>>8)&255)*k|0},${(n&255)*k|0})`};
+const restart=(el,c)=>{el.classList.remove(c);void el.offsetWidth;el.classList.add(c)};
+['a','b'].forEach(t=>{P[t].innerHTML='<div class="pTop"><div class="avatar"></div><div class="name"></div></div><div class="scoreWrap"><div class="score">0</div></div><div class="pBot"><div class="serve"><span class="ball">🏐</span> SERVE</div><button class="minus" aria-label="Remove one point">−1</button></div>'});
+
+/* ============ SCORING ENGINE ============ */
+const need=()=>(S.bestOf+1)/2;
+const isFinal=()=>S.setNo===S.bestOf;
+const target=()=>isFinal()?15:25;
+const won=(x,y)=>x>=target()&&x-y>=2;
+const canWin=t=>won(S.t[t].score+1,S.t[other(t)].score);
+const live=()=>!S.paused&&!S.over&&!S.pend;
+function special(){
+  if(S.over||S.pend)return null;
+  for(const t of['a','b'])if(canWin(t))return{type:S.t[t].sets+1>=need()?'match':'set',t};
+  if(S.t.a.score===S.t.b.score&&S.t.a.score>=target()-1)return{type:'deuce'};
+  return null;
+}
+function addPoint(t){
+  if(!live())return;
+  snap();
+  if(!S.started){S.started=true;lastTick=Date.now()}
+  S.t[t].score++;S.server=t;
+  const p=P[t];restart($('.score',p),'bump');plusOne(p);buzz(12);beep(880,.07);
+  if(won(S.t[t].score,S.t[other(t)].score))finishSet(t);
+  commit();
+}
+function minus(t){
+  if(S.t[t].score<1||!live())return;
+  const go=()=>{snap();S.t[t].score--;commit()};
+  Math.max(S.t.a.score,S.t.b.score)>=target()-1
+    ?confirmBox('Remove a point from '+nm(t)+'?','The set is in deuce or set-point range, so this changes the set situation.','Remove point',go):go();
+}
+
+/* ============ SET ENGINE ============ */
+function finishSet(t){
+  S.t[t].sets++;
+  S.hist.push({set:S.setNo,a:S.t.a.score,b:S.t.b.score,w:t,fin:isFinal()});
+  if(S.t[t].sets>=need())S.over=true;else S.pend=true;
+  beep(660,.12);setTimeout(()=>beep(990,.2),140);buzz([30,40,60]);
+  showSetModal();
+}
+function nextSet(){
+  const w=S.hist[S.hist.length-1].w;
+  snap();
+  S.pend=false;S.setNo++;S.t.a.score=0;S.t.b.score=0;S.server=other(w);
+  if(S.auto){S.flip=!S.flip;toast('Sides switched')}
+  closeModal();commit();
+}
+function showSetModal(){
+  const h=S.hist[S.hist.length-1],w=h.w,c=S.t[w].color;
+  const title=S.over?'MATCH COMPLETE':(h.fin?'FINAL SET':'SET '+h.set)+' COMPLETE';
+  const acts=S.over
+    ?[{l:'NEW MATCH',c:'pri',f:()=>confirmBox('Start a new match?','Scores and history will be cleared. Team names and colors stay.','New match',newMatch)},{l:'View scoreboard',f:()=>{}},{l:'Undo last point',f:undo}]
+    :[{l:'START NEXT SET',c:'pri',f:nextSet},{l:'Undo last point',f:undo}];
+  modal(`<h2>${title}</h2><div class="big">${h.a} – ${h.b}</div><div class="winl" style="color:${c}">${nm(w)} WINS THE ${S.over?'MATCH':'SET'}</div><p>Overall<br><b>${nm('a')} ${S.t.a.sets} – ${S.t.b.sets} ${nm('b')}</b></p>${S.over?'<p>'+S.hist.map(x=>x.a+'–'+x.b).join(' · ')+'</p>':''}`,acts,false);
+}
+function newMatch(){
+  Object.assign(S,{setNo:1,server:'a',hist:[],over:false,pend:false,flip:false,paused:false,started:false,elapsed:0});
+  ['a','b'].forEach(t=>{S.t[t].score=0;S.t[t].sets=0});
+  undoStack=[];closeModal();commit();
+}
+
+/* ============ TIMER ============ */
+const running=()=>S.started&&!S.paused&&!S.over;
+function tick(){const n=Date.now();if(running())S.elapsed+=n-lastTick;lastTick=n;renderTimer()}
+function renderTimer(){
+  const s=Math.floor(S.elapsed/1000),h=Math.floor(s/3600),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');
+  E.timer.textContent=h?`${String(h).padStart(2,'0')}:${m}:${x}`:`${m}:${x}`;
+}
+function setPause(v){if(S.over)return;tick();S.paused=v;commit()}
+
+/* ============ UNDO ============ */
+const snapState=()=>JSON.stringify({a:[S.t.a.score,S.t.a.sets],b:[S.t.b.score,S.t.b.sets],setNo:S.setNo,server:S.server,hist:S.hist,over:S.over,pend:S.pend,flip:S.flip});
+function snap(){undoStack.push(snapState());if(undoStack.length>MAX_UNDO)undoStack.shift()}
+function undo(){
+  if(!undoStack.length)return;
+  const d=JSON.parse(undoStack.pop());
+  [S.t.a.score,S.t.a.sets]=d.a;[S.t.b.score,S.t.b.sets]=d.b;
+  Object.assign(S,{setNo:d.setNo,server:d.server,hist:d.hist,over:d.over,pend:d.pend,flip:d.flip});
+  closeModal();commit();if(S.pend)showSetModal();
+}
+
+/* ============ UI RENDERING ============ */
+function render(){
+  const fin=isFinal(),L=S.flip?'b':'a',R=other(L);
+  E.set.textContent=fin?'FINAL SET':'SET '+S.setNo;
+  E.rule.innerHTML=(fin?'Final Set<br>':'')+`First to ${target()} • Win by 2`;
+  ['a','b'].forEach(t=>{
+    const T=S.t[t],p=P[t],n=nm(t).length;
+    p.style.setProperty('--c',T.color);p.style.setProperty('--c1',shade(T.color,.55));p.style.setProperty('--c2',shade(T.color,.3));
+    p.style.order=t===L?1:3;
+    p.style.setProperty('--k',n>20?.55:n>14?.7:n>10?.85:1);
+    $('.name',p).textContent=nm(t);
+    $('.avatar',p).textContent=T.avatar||nm(t).charAt(0);
+    $('.score',p).textContent=T.score;
+    $('.serve',p).classList.toggle('on',S.server===t);
+    $('.minus',p).disabled=T.score<1||!live();
+    p.setAttribute('aria-label',nm(t)+' score '+T.score+', tap to add a point');
+  });
+  if(prevServer&&prevServer!==S.server)restart($('.serve.on'),'swap');
+  prevServer=S.server;
+  E.sL.textContent=S.t[L].sets;E.sL.style.setProperty('--c',S.t[L].color);
+  E.sR.textContent=S.t[R].sets;E.sR.style.setProperty('--c',S.t[R].color);
+  const sp=special();let call='',cls='';
+  if(S.over){const w=S.hist[S.hist.length-1].w;call='🏆 '+nm(w)+' WINS';cls='win'}
+  else if(sp&&sp.type==='match'){call='🏆 MATCH POINT<small>'+nm(sp.t)+'</small>';cls='match'}
+  else if(sp&&sp.type==='set'){call='🔥 SET POINT<small>'+nm(sp.t)+'</small>';cls='set'}
+  else if(sp){call=fin?'MATCH DEUCE':'DEUCE';cls='deuce'}
+  E.call.innerHTML=call;E.call.className=cls;
+  const st=S.over?['FINISHED','#ffd60a']:S.pend?['SET COMPLETE','#ff7a00']:S.paused?['PAUSED','#f59e0b']:!S.started?['READY','#60a5fa']:['LIVE','#22c55e'];
+  E.state.textContent=st[0];E.state.style.setProperty('--dot',st[1]);E.state.classList.toggle('live',st[0]==='LIVE');
+  E.pause.hidden=!(S.paused&&!S.over);
+  E.undo.disabled=!undoStack.length;
+  E.pbtn.disabled=S.over;
+  E.pbtn.innerHTML=S.paused?'<em>▶</em><span>Resume</span>':'<em>⏸</em><span>Pause</span>';
+  E.sound.innerHTML=`<em>${S.sound?'🔊':'🔇'}</em><span>Sound</span>`;
+  renderTimer();
+}
+function modal(html,acts=[],dismiss=true){
+  modalDismiss=dismiss;E.sheet.innerHTML=html+'<div class="acts"></div>';
+  const box=$('.acts',E.sheet);
+  acts.forEach(a=>{const b=document.createElement('button');b.className='btn '+(a.c||'');b.textContent=a.l;b.onclick=()=>{if(!a.keep)closeModal();a.f&&a.f()};box.appendChild(b)});
+  E.modal.hidden=false;
+}
+function closeModal(){E.modal.hidden=true;E.sheet.innerHTML=''}
+function confirmBox(title,msg,ok,fn){modal(`<h2>${esc(title)}</h2><p>${esc(msg)}</p>`,[{l:ok,c:'dng',f:fn},{l:'Cancel'}])}
+function toast(m){E.toast.textContent=m;E.toast.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>E.toast.classList.remove('show'),1400)}
+function showHistory(){
+  const rows=S.hist.map(h=>`<div class="hrow"><span>${h.fin?'FINAL SET':'SET '+h.set}</span><span>${h.a} – ${h.b}</span><span style="color:${S.t[h.w].color}">${esc(nm(h.w))}</span></div>`).join('');
+  const cur=(!S.over&&!S.pend)?`<div class="hrow"><span>${isFinal()?'FINAL SET':'SET '+S.setNo}</span><span>${S.t.a.score} – ${S.t.b.score}</span><span>In play</span></div>`:'';
+  modal(`<h2>SET HISTORY</h2>${rows+cur||'<p>No sets played yet.</p>'}<p>Sets: <b>${esc(nm('a'))} ${S.t.a.sets} – ${S.t.b.sets} ${esc(nm('b'))}</b></p>`,[{l:'Close',c:'pri'}]);
+}
+
+/* ============ ANIMATIONS ============ */
+function plusOne(p){const e=document.createElement('div');e.className='plus';e.textContent='+1';$('.scoreWrap',p).appendChild(e);e.addEventListener('animationend',()=>e.remove())}
+function buzz(p){if(S.vib&&navigator.vibrate)try{navigator.vibrate(p)}catch(e){}}
+function beep(f,d){
+  if(!S.sound)return;
+  try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.08;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}
+}
+
+/* ============ SETTINGS ============ */
+function openSettings(){
+  const row=t=>`<div class="team"><input type="text" data-f="name" data-t="${t}" value="${esc(S.t[t].name)}" maxlength="24" aria-label="Team ${t.toUpperCase()} name"><input type="text" data-f="avatar" data-t="${t}" value="${esc(S.t[t].avatar)}" maxlength="4" placeholder="Logo" aria-label="Avatar"><input type="color" data-f="color" data-t="${t}" value="${S.t[t].color}" aria-label="Color"></div>`;
+  const locked=S.started||S.hist.length;
+  modal(`<h2>SETTINGS</h2><div class="lbl">TEAMS · NAME, AVATAR, COLOR</div>${row('a')+row('b')}
+  <div class="lbl">MATCH FORMAT${locked?' · RESET MATCH TO CHANGE':''}</div>
+  <div class="grid2"><button class="btn bo ${S.bestOf===3?'on':''}" data-bo="3" ${locked?'disabled':''}>Best of 3</button><button class="btn bo ${S.bestOf===5?'on':''}" data-bo="5" ${locked?'disabled':''}>Best of 5</button></div>
+  <label class="sw">Auto side switch<input type="checkbox" id="stAuto" ${S.auto?'checked':''}></label>
+  <label class="sw">Vibration<input type="checkbox" id="stVib" ${S.vib?'checked':''}></label>
+  <div class="lbl">CONTROLS</div>
+  <div class="grid2"><button class="btn" id="stSw">⇄ Switch sides</button><button class="btn" id="stTm">Reset timer</button>
+  <button class="btn" data-sv="a">🏐 Serve: ${esc(nm('a'))}</button><button class="btn" data-sv="b">🏐 Serve: ${esc(nm('b'))}</button></div>
+  <button class="btn dng" id="stRs" style="width:100%;margin-top:14px">Reset match</button>`,[{l:'Done',c:'pri'}]);
+  const sh=E.sheet;
+  sh.querySelectorAll('[data-f]').forEach(i=>i.addEventListener('input',()=>{
+    const f=i.dataset.f;S.t[i.dataset.t][f]=f==='avatar'?Array.from(i.value).slice(0,2).join(''):i.value;render();save();
+  }));
+  sh.querySelectorAll('.bo').forEach(b=>b.onclick=()=>{S.bestOf=+b.dataset.bo;sh.querySelectorAll('.bo').forEach(x=>x.classList.toggle('on',x===b));commit()});
+  $('#stAuto',sh).onchange=e=>{S.auto=e.target.checked;save()};
+  $('#stVib',sh).onchange=e=>{S.vib=e.target.checked;save()};
+  $('#stSw',sh).onclick=()=>{snap();S.flip=!S.flip;commit();toast('Sides switched')};
+  $('#stTm',sh).onclick=()=>{S.elapsed=0;lastTick=Date.now();commit();toast('Timer reset')};
+  sh.querySelectorAll('[data-sv]').forEach(b=>b.onclick=()=>{snap();S.server=b.dataset.sv;commit();toast('Serve: '+nm(S.server))});
+  $('#stRs',sh).onclick=()=>confirmBox('Reset match?','All scores, sets, history and the timer will be cleared. Team names and colors stay.','Reset match',newMatch);
+}
+
+/* ============ STORAGE ============ */
+function save(){try{localStorage.setItem(KEY,JSON.stringify({S,undo:undoStack}))}catch(e){}}
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY)||'null');if(!d)return;
+    const t=d.S.t;Object.assign(S,d.S);S.t={a:Object.assign(mk('','',''),t.a),b:Object.assign(mk('','',''),t.b)};
+    undoStack=Array.isArray(d.undo)?d.undo:[];
+  }catch(e){}
+}
+function commit(){render();save()}
+
+/* ============ EVENT HANDLERS ============ */
+['a','b'].forEach(t=>{
+  P[t].addEventListener('click',()=>addPoint(t));
+  P[t].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();addPoint(t)}});
+  $('.minus',P[t]).addEventListener('click',e=>{e.stopPropagation();minus(t)});
+});
+E.undo.onclick=undo;
+E.sound.onclick=()=>{S.sound=!S.sound;commit();toast(S.sound?'Sound on':'Sound off')};
+E.pbtn.onclick=()=>setPause(!S.paused);
+$('#resumeBtn').onclick=()=>setPause(false);
+$('#bHist').onclick=showHistory;
+$('#bSet').onclick=openSettings;
+E.modal.addEventListener('click',e=>{if(e.target===E.modal&&modalDismiss)closeModal()});
+document.addEventListener('keydown',e=>{
+  if(!E.modal.hidden||/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  const L=S.flip?'b':'a';
+  if(e.key==='ArrowLeft')addPoint(L);
+  else if(e.key==='ArrowRight')addPoint(other(L));
+  else if(e.key==='z'||e.key==='Backspace')undo();
+  else if(e.key==='p')setPause(!S.paused);
+});
+['gesturestart','gesturechange'].forEach(g=>document.addEventListener(g,e=>e.preventDefault()));
+document.addEventListener('dblclick',e=>e.preventDefault());
+async function keepAwake(){try{if('wakeLock'in navigator&&document.visibilityState==='visible')wake=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{lastTick=Date.now();keepAwake()});
+document.addEventListener('pointerdown',keepAwake,{once:true});
+window.addEventListener('pagehide',save);
+
+/* ============ INIT ============ */
+load();render();
+if(S.pend)showSetModal();
+setInterval(tick,250);
+setInterval(save,5000);
+})();
+</script>
+</body>
+</html>
