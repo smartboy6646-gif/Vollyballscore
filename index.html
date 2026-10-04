@@ -4,23 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
-<title>Pro Volleyball Auto-Landscape Scoreboard</title>
+<title>Pro Volleyball Neon Scoreboard</title>
 <style>
 :root {
-  --bg-left: #4ade80; /* Green */
-  --bg-right: #f87171; /* Red */
+  /* Default Colors (Changeable in App) */
+  --bg-left: #4ade80; 
+  --bg-right: #f87171; 
+  
   --text-light: #ffffff;
-  --pill-bg: #ffffff;
-  --pill-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  --icon-color: #4b5563;
+  --pill-bg: rgba(255, 255, 255, 0.95);
+  --pill-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  --icon-color: #374151;
   --accent: #22d3a7;
-  --muted: #8b94a8;
-  --border: rgba(255,255,255,.10);
+  
+  /* Dynamic Streak Glow Variables */
+  --streak-glow-a: 0px;
+  --streak-glow-b: 0px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-/* Fixed body to prevent scrolling */
 body, html { 
   width: 100%; height: 100%; 
   background: #000; overflow: hidden; position: fixed; inset: 0;
@@ -32,25 +35,39 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .hidden { display: none !important; }
 
 /* =======================================================
-   MAGIC CSS: FORCE LANDSCAPE ON PORTRAIT PHONES
+   FORCE LANDSCAPE CSS
    ======================================================= */
 #app-wrapper {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  overflow: hidden;
-  background: #000;
+  position: absolute; top: 0; left: 0;
+  width: 100vw; height: 100vh; overflow: hidden; background: #000;
   display: flex; flex-direction: column;
 }
 
+/* =======================================================
+   TEXT SIZES - (YAHAN SE AAP SIZE CHANGE KAR SAKTE HAIN)
+   ======================================================= */
+/* Landscape View (PC/Tablet) ke liye Text Size */
+.score { 
+  font-size: 28vw; /* MAIN SCORE SIZE (Isko 25vw ya 35vw karke dekhein) */
+  font-weight: 900; color: white; line-height: 1; 
+  transition: text-shadow 0.3s ease, transform 0.1s;
+}
+.player-name { 
+  font-size: 8vw; /* TEAM NAME SIZE */
+}
+
+/* Portrait View (Mobile force-landscape) ke liye Text Size */
 @media screen and (orientation: portrait) {
   #app-wrapper {
-    width: 100vh;
-    height: 100vw;
-    top: 0;
-    left: 100vw;
-    transform: rotate(90deg);
-    transform-origin: top left;
+    width: 100vh; height: 100vw;
+    top: 0; left: 100vw;
+    transform: rotate(90deg); transform-origin: top left;
+  }
+  .score { 
+    font-size: 38vh; /* MOBILE PAR MAIN SCORE SIZE (Isko badal kar fit karein) */
+  }
+  .player-name { 
+    font-size: 8vh;  /* MOBILE PAR TEAM NAME SIZE */
   }
 }
 
@@ -59,237 +76,358 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
 .side { 
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-  position: relative; cursor: pointer; transition: filter 0.2s; 
+  position: relative; cursor: pointer; transition: background-color 0.3s, filter 0.2s; 
 }
 .side:active { filter: brightness(0.9); }
 .side-left { background-color: var(--bg-left); }
 .side-right { background-color: var(--bg-right); }
 
 /* Serving Indicator */
-.serve-indicator { position: absolute; top: 15%; font-size: 2.5rem; opacity: 0; transition: 0.3s; }
+.serve-indicator { position: absolute; top: 5%; font-size: 2.5rem; opacity: 0; transition: 0.3s; z-index: 10;}
 .serving .serve-indicator { opacity: 1; animation: bounce 1s infinite alternate; }
-@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
-/* Player Info (Name & Sets Won) */
-.player-info { text-align: center; color: white; position: absolute; top: 12%; z-index: 2; width: 100%; }
-.avatar { font-size: 2.5rem; margin-bottom: 2px; }
-.player-name { font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-.set-win-badge { 
-  display: inline-block; background: rgba(0,0,0,0.4); padding: 5px 15px; 
-  border-radius: 20px; font-weight: 800; font-size: 1rem; margin-top: 5px; 
-  border: 1px solid rgba(255,255,255,0.2); letter-spacing: 1px; color: #fff;
+/* Player Info with Neon Glow */
+.player-info { text-align: center; color: white; position: absolute; top: 3%; z-index: 5; width: 100%; }
+.player-name { 
+  font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
+  animation: neon-pulse 1.5s infinite alternate;
+  text-shadow: 0 0 5px #fff, 0 0 15px rgba(255,255,255,0.7);
+}
+@keyframes neon-pulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; transform: scale(1.02); }
 }
 
-/* HUGE Score Text */
+/* Fixed Huge Score Text with Streak Glow (White glow for any BG) */
 .score-box { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
-.score { 
-  font-size: 55vh; /* HUGE SIZE filling the screen height */
-  font-weight: 900; color: white; line-height: 0.8; 
-  text-shadow: 0 15px 30px rgba(0,0,0,0.25); 
-}
+.score:active { transform: scale(0.95); }
+.score-left-glow { text-shadow: 0 0 var(--streak-glow-a) #fff, 0 0 calc(var(--streak-glow-a) * 1.5) #fff, 0 10px 20px rgba(0,0,0,0.5); }
+.score-right-glow { text-shadow: 0 0 var(--streak-glow-b) #fff, 0 0 calc(var(--streak-glow-b) * 1.5) #fff, 0 10px 20px rgba(0,0,0,0.5); }
 
-/* Floating UI Pills (Kept Small) */
+/* Floating UI Pills */
 .floating-pill { 
   position: absolute; left: 50%; transform: translateX(-50%); 
   background: var(--pill-bg); border-radius: 50px; 
-  box-shadow: var(--pill-shadow); display: flex; align-items: center; justify-content: center; z-index: 20; 
+  box-shadow: var(--pill-shadow); display: flex; align-items: center; justify-content: center; z-index: 50; 
 }
 
-/* Top Timer & Current Set Pill */
-.top-timer { top: 15px; padding: 6px 16px; gap: 15px; }
-.time-text { font-size: 1rem; font-weight: 800; color: #000; font-variant-numeric: tabular-nums; }
-.top-timer button { font-size: 1rem; color: var(--icon-color); }
+/* Center Set Pill (Top) */
+.center-sets { 
+  top: 15px; padding: 10px 25px; border-radius: 30px; 
+  text-align: center; background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 4px 10px rgba(0,0,0,0.2);
+}
+#current-set-label { font-size: 1.2rem; font-weight: 900; color: #111827; letter-spacing: 1px;}
+.target-score-info { font-size: 0.8rem; color: #4b5563; font-weight: 800; }
 
-.center-sets { top: 60px; padding: 6px 20px; font-size: 1.2rem; font-weight: 900; color: #4b5563; background: #fff; border-radius: 30px; box-shadow: var(--pill-shadow); position: absolute; left: 50%; transform: translateX(-50%); z-index: 20;}
-.target-score-info { font-size: 0.75rem; color: #6b7280; font-weight: 700; text-align: center; }
+/* =======================================================
+   CENTER SETS WON (YELLOW BOX AREA)
+   YAHAN SE SET WIN KA TEXT SIZE BADLEIN
+   ======================================================= */
+.sets-won-center {
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  flex-direction: column; padding: 10px 25px; border-radius: 20px;
+  background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 60;
+  
+  /* SET WIN AREA OVERALL SIZE: */
+  font-size: 2.9rem; /* Isko kam/zyada karein box ka size chhota/bada karne ke liye */
+}
+.sets-won-title { font-size: 0.6em; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
+.sets-won-scores { font-weight: 900; font-size: 1.2em; display: flex; gap: 15px; align-items: center;}
+.set-score-a { color: var(--bg-left); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+.set-score-b { color: var(--bg-right); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+
 
 /* Bottom Menu Pill */
-.bottom-controls { bottom: 15px; padding: 8px 20px; gap: 25px; }
-.bottom-controls button { font-size: 1.4rem; color: var(--icon-color); transition: 0.2s; }
-.bottom-controls button:active { transform: scale(0.9); }
+.bottom-controls { bottom: 15px; padding: 10px 25px; gap: 25px; }
+.bottom-controls button { font-size: 1.5rem; color: var(--icon-color); transition: 0.2s; font-weight: 900;}
+.bottom-controls button:active { transform: scale(0.85); }
 
-/* ---------- OVERLAYS (Setup, History, Match Over) ---------- */
+/* ---------- OVERLAYS (Setup, Modals) ---------- */
 .overlay { 
   position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; 
-  padding: 20px; background: rgba(0,0,0,.8); backdrop-filter: blur(10px); 
+  padding: 20px; background: rgba(0,0,0,.85); backdrop-filter: blur(8px); 
 }
 .box { 
-  width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; color: white; 
-  background: #111827; border: 1px solid var(--border); border-radius: 20px; padding: 25px 20px; 
+  width: 100%; max-width: 440px; color: white; background: #111827; 
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 25px; 
   box-shadow: 0 20px 50px rgba(0,0,0,.9); 
 }
-.setup-title { text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 20px; color: var(--text-light); }
+.modal-title { text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 20px; color: var(--accent); text-transform: uppercase;}
 .field { margin-bottom: 15px; }
-.field > label { display: block; margin-bottom: 8px; font-size: .75rem; font-weight: 800; color: var(--muted); text-transform: uppercase;}
-.field input[type=text] { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.05); color: white; font-size: 1rem; font-weight: bold; outline: none; }
-.team-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.segmented { display: flex; gap: 5px; padding: 5px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid var(--border); }
-.segmented button { flex: 1; padding: 10px; border-radius: 8px; font-size: .9rem; font-weight: 800; color: var(--muted); }
-.segmented button.active { background: var(--accent); color: #000; }
-.btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:15px; text-transform: uppercase;}
-.btn-ghost { width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border); color: var(--muted); font-size: .9rem; font-weight: 800;}
+.field > label { display: block; margin-bottom: 8px; font-size: .8rem; font-weight: 800; color: #9ca3af; text-transform: uppercase;}
+.field select { 
+  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); 
+  background: rgba(0,0,0,0.3); color: white; font-size: 1rem; font-weight: bold; outline: none; 
+}
 
-/* History Modal inside Wrapper */
-.history-modal { background: white; width: 90%; max-width: 500px; max-height: 80vh; border-radius: 20px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; color: #000;}
-.modal-header { text-align: center; color: #4b5563; font-weight: 900; font-size: 1.2rem; margin-bottom: 20px; }
-.history-list { display: flex; flex-direction: column; gap: 10px; }
-.history-item-wrap { position:relative; display:flex; align-items:center; margin-bottom: 15px; padding-left: 60px;}
-.history-time { font-size: 0.8rem; font-weight: bold; color: #6b7280; position: absolute; left: 0; text-align: center;}
-.history-item { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(90deg, #a855f7 50%, #facc15 50%); border-radius: 50px; padding: 10px 15px; color: white; flex:1;}
-.h-player { font-weight: bold; font-size: 0.9rem;}
-.h-score-box { background: white; border-radius: 20px; display: flex; overflow: hidden; font-weight: 900; margin: 0 10px;}
-.h-score-left { padding: 5px 10px; color: #a855f7; }
-.h-score-right { padding: 5px 10px; color: #facc15; }
-.close-modal { align-self: flex-end; margin-top: 20px; color: #ef4444; font-weight: 900; background: none; border: none; font-size: 1rem; cursor: pointer; text-transform: uppercase; }
+/* Color Picker & Name Row */
+.color-picker-row { display: flex; gap: 10px; }
+.color-picker-row input[type=text] { 
+  flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); 
+  background: rgba(0,0,0,0.3); color: white; font-size: 1rem; font-weight: bold; outline: none; 
+}
+.color-picker-row input[type=color] { 
+  width: 50px; height: 100%; min-height: 46px; border: none; border-radius: 12px; 
+  cursor: pointer; background: transparent; 
+}
+.color-picker-row input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker-row input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.5); border-radius: 12px; }
 
-/* Match Over Modal Texts */
-.modal-title { font-size:1.5rem; font-weight:900; text-transform:uppercase; color:var(--accent); text-align:center;}
-.modal-score { font-size:3rem; font-weight:900; margin:10px 0; text-align:center; color: #fff;}
-.modal-desc { font-size:1.1rem; font-weight:800; text-align:center; color:#ccc;}
+.team-inputs { display: flex; flex-direction: column; gap: 12px; }
+.segmented { display: flex; gap: 5px; padding: 5px; border-radius: 14px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,0.2); }
+.segmented button { flex: 1; padding: 11px 6px; border-radius: 10px; font-size: .85rem; font-weight: 800; color: #9ca3af; transition: 0.2s;}
+.segmented button.active { background: var(--accent); color: #000; box-shadow: 0 0 10px rgba(34, 211, 167, 0.5);}
+.btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:10px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost { width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; font-size: .9rem; font-weight: 800;}
 </style>
 </head>
 <body>
 
-<!-- ALL content wrapped in #app-wrapper to force auto-landscape via CSS -->
 <div id="app-wrapper">
-  
-  <!-- ============ SETUP SCREEN ============ -->
+
+  <!-- ============ SETUP SCREEN (First Screen) ============ -->
   <div id="setup-screen" class="overlay">
     <div class="box">
-      <div class="setup-title">Volleyball Auto-Landscape</div>
+      <div class="modal-title">Volleyball Match Setup</div>
+      
       <div class="team-inputs">
         <div class="field">
-          <label>Team 1 (Green)</label>
-          <input type="text" id="setup-a-name" value="Player 1" maxlength="16" autocomplete="off">
+          <label>Team 1 Name & Color</label>
+          <div class="color-picker-row">
+            <input type="text" id="setup-a-name" value="TEAM 1" maxlength="12" autocomplete="off">
+            <input type="color" id="setup-a-color" value="#4ade80">
+          </div>
         </div>
         <div class="field">
-          <label>Team 2 (Red)</label>
-          <input type="text" id="setup-b-name" value="Player 2" maxlength="16" autocomplete="off">
+          <label>Team 2 Name & Color</label>
+          <div class="color-picker-row">
+            <input type="text" id="setup-b-name" value="TEAM 2" maxlength="12" autocomplete="off">
+            <input type="color" id="setup-b-color" value="#f87171">
+          </div>
         </div>
       </div>
-      <div class="field">
+      
+      <div class="field" style="margin-top: 10px;">
         <label>Match Format</label>
         <div class="segmented" id="format-seg">
           <button type="button" data-value="3">Best of 3</button>
           <button type="button" data-value="5" class="active">Best of 5</button>
         </div>
       </div>
+
+      <div class="field">
+        <label>Final Set Target Score</label>
+        <select id="setup-target">
+          <option value="15">Play to 15 (Standard)</option>
+          <option value="25">Play to 25</option>
+        </select>
+      </div>
+
       <button class="btn-primary" id="btn-start">Start Match 🚀</button>
     </div>
   </div>
-
+  
   <!-- ============ MAIN UI APP ============ -->
   <div id="main-app" class="hidden">
     
-    <!-- Floating Top Timer -->
-    <div class="floating-pill top-timer">
-      <button id="btn-pause">⏸</button>
-      <span class="time-text" id="timer">00:00:00</span>
-      <button id="btn-reset-timer">↺</button>
-    </div>
-
-    <!-- Center Set Pill -->
-    <div class="center-sets">
-      <div id="current-set-label" style="text-align: center;">SET 1</div>
+    <!-- Top Center Set Info -->
+    <div class="floating-pill center-sets">
+      <div id="current-set-label">SET 1</div>
       <div class="target-score-info" id="target-info">To 25 (Win by 2)</div>
     </div>
 
-    <!-- Left Side (Green) -->
-    <div class="side side-left" id="side-a">
-      <div class="serve-indicator">🏐</div>
-      <div class="player-info">
-        <div class="player-name" id="name-a">Player 1</div>
-        <div class="set-win-badge">SETS WON: <span id="sets-a">0</span></div>
-      </div>
-      <div class="score-box" id="click-a">
-        <div class="score" id="score-a">0</div>
+    <!-- CENTER SETS WON PILL (Yellow Box Area) -->
+    <div class="floating-pill sets-won-center">
+      <div class="sets-won-title">SETS WON</div>
+      <div class="sets-won-scores">
+        <span class="set-score-a" id="sets-a">0</span> 
+        <span style="color:#777">-</span> 
+        <span class="set-score-b" id="sets-b">0</span>
       </div>
     </div>
 
-    <!-- Right Side (Red) -->
+    <!-- Left Side -->
+    <div class="side side-left" id="side-a">
+      <div class="serve-indicator">🏐</div>
+      <div class="player-info">
+        <div class="player-name name-left" id="name-a">TEAM 1</div>
+      </div>
+      <div class="score-box" id="click-a">
+        <div class="score score-left-glow" id="score-a">0</div>
+      </div>
+    </div>
+
+    <!-- Right Side -->
     <div class="side side-right" id="side-b">
       <div class="serve-indicator">🏐</div>
       <div class="player-info">
-        <div class="player-name" id="name-b">Player 2</div>
-        <div class="set-win-badge">SETS WON: <span id="sets-b">0</span></div>
+        <div class="player-name name-right" id="name-b">TEAM 2</div>
       </div>
       <div class="score-box" id="click-b">
-        <div class="score" id="score-b">0</div>
+        <div class="score score-right-glow" id="score-b">0</div>
       </div>
     </div>
 
     <!-- Floating Bottom Controls -->
     <div class="floating-pill bottom-controls">
-      <button id="btn-reset" title="New Match">🔄</button>
+      <button id="btn-settings" title="Settings">⚙️</button>
       <button id="btn-undo" title="Undo">↩</button>
-      <button id="btn-sub-a" title="Minus Green Point" style="color:var(--bg-left); font-weight:900;">-1</button>
-      <button id="btn-sub-b" title="Minus Red Point" style="color:var(--bg-right); font-weight:900;">-1</button>
-      <button id="btn-history" title="History">🕒</button>
+      <button id="btn-sub-a" title="Minus T1 Point" style="color:var(--icon-color); font-weight:800">-1</button>
+      <button id="btn-sub-b" title="Minus T2 Point" style="color:var(--icon-color); font-weight:800">-1</button>
+      <button id="btn-reset" title="Reset Match">🔄</button>
     </div>
-
   </div>
 
-  <!-- ============ SET / MATCH OVER MODAL ============ -->
+  <!-- ============ SETTINGS MODAL ============ -->
+  <div id="modal-settings" class="overlay hidden">
+    <div class="box">
+      <div class="modal-title">Match Settings</div>
+      <div class="team-inputs">
+        <div class="field">
+          <label>Team 1 Name & Color</label>
+          <div class="color-picker-row">
+            <input type="text" id="settings-a-name" maxlength="12" autocomplete="off">
+            <input type="color" id="settings-a-color">
+          </div>
+        </div>
+        <div class="field">
+          <label>Team 2 Name & Color</label>
+          <div class="color-picker-row">
+            <input type="text" id="settings-b-name" maxlength="12" autocomplete="off">
+            <input type="color" id="settings-b-color">
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 10px;">
+        <label>Final Set Target Score</label>
+        <select id="settings-target">
+          <option value="15">Play to 15</option>
+          <option value="25">Play to 25</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="btn-save-settings">Save & Resume</button>
+      <button class="btn-ghost" id="btn-cancel-settings">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ============ MATCH OVER MODAL ============ -->
   <div id="modal-set" class="overlay hidden">
     <div class="box" style="text-align:center;">
       <div class="modal-title" id="modal-title">Set Complete</div>
-      <div class="modal-score" id="modal-score">25 – 23</div>
-      <div class="modal-desc" id="modal-desc">Player 1 wins the set</div>
-      <div class="modal-desc" id="modal-overall" style="font-size: 0.9rem; color: #888; margin-top: 15px;">Player 1 (1) - (0) Player 2</div>
+      <div style="font-size: 3.5rem; font-weight: 900; margin: 15px 0;" id="modal-score">25 – 23</div>
+      <div style="font-size: 1.2rem; font-weight: 800;" id="modal-desc">Team 1 wins the set!</div>
       <button class="btn-primary" id="btn-next-set">Start Next Set</button>
       <button class="btn-ghost" id="btn-undo-modal">↩ Undo Last Point</button>
     </div>
   </div>
 
-  <!-- ============ HISTORY MODAL ============ -->
-  <div class="overlay hidden" id="history-modal" style="background: rgba(0,0,0,0.7);">
-    <div class="history-modal">
-      <div class="modal-header">🕒 SET HISTORY</div>
-      <div class="history-list" id="history-list">
-        <!-- Generated via JS -->
-      </div>
-      <button class="close-modal" onclick="closeHistory()">← CLOSE</button>
-    </div>
-  </div>
-
-</div> <!-- End of #app-wrapper -->
+</div>
 
 <script>
 (function () {
   'use strict';
 
+  // Load Saved Data from LocalStorage
+  document.getElementById('setup-a-name').value = localStorage.getItem('vb_teamA') || 'TEAM 1';
+  document.getElementById('setup-b-name').value = localStorage.getItem('vb_teamB') || 'TEAM 2';
+  document.getElementById('setup-a-color').value = localStorage.getItem('vb_colorA') || '#4ade80';
+  document.getElementById('setup-b-color').value = localStorage.getItem('vb_colorB') || '#f87171';
+  document.getElementById('setup-target').value = localStorage.getItem('vb_target') || '15';
+
   // State
+  let selectedFormat = 5; 
   let state = {
-    teamA: 'Player 1', teamB: 'Player 2', format: 5, currentSet: 1,
-    scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', setHistory: [], timeSeconds: 0, status: 'setup'
+    teamA: 'TEAM 1', teamB: 'TEAM 2', 
+    colorA: '#4ade80', colorB: '#f87171',
+    format: 5, currentSet: 1,
+    scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', status: 'setup',
+    finalTarget: 15
   };
+  
   let undoStack = [];
-  let clockHandle = null;
-  let selectedFormat = 5;
+  let streakA = 0;
+  let streakB = 0;
 
   const els = {
-    setup: document.getElementById('setup-screen'),
+    setupScreen: document.getElementById('setup-screen'),
     app: document.getElementById('main-app'),
-    modal: document.getElementById('modal-set'),
+    modalSet: document.getElementById('modal-set'),
+    modalSettings: document.getElementById('modal-settings'),
+    
     sideA: document.getElementById('side-a'), sideB: document.getElementById('side-b'),
     nameA: document.getElementById('name-a'), nameB: document.getElementById('name-b'),
     scoreA: document.getElementById('score-a'), scoreB: document.getElementById('score-b'),
     setsA: document.getElementById('sets-a'), setsB: document.getElementById('sets-b'),
     currentSet: document.getElementById('current-set-label'),
     targetInfo: document.getElementById('target-info'),
-    timer: document.getElementById('timer')
+    
+    // Setup inputs
+    inputSetupA: document.getElementById('setup-a-name'),
+    inputSetupB: document.getElementById('setup-b-name'),
+    inputSetupColorA: document.getElementById('setup-a-color'),
+    inputSetupColorB: document.getElementById('setup-b-color'),
+    inputSetupTarget: document.getElementById('setup-target'),
+    
+    // Settings inputs
+    inputSettingsA: document.getElementById('settings-a-name'),
+    inputSettingsB: document.getElementById('settings-b-name'),
+    inputSettingsColorA: document.getElementById('settings-a-color'),
+    inputSettingsColorB: document.getElementById('settings-b-color'),
+    inputSettingsTarget: document.getElementById('settings-target')
   };
 
-  function targetScore() { return state.currentSet === state.format ? 15 : 25; }
+  // Setup Format toggle
+  document.getElementById('format-seg').addEventListener('click', function(e) {
+    if(e.target.tagName !== 'BUTTON') return;
+    selectedFormat = parseInt(e.target.dataset.value);
+    Array.from(this.children).forEach(b => b.classList.toggle('active', b === e.target));
+  });
+
+  // Start Match Logic
+  document.getElementById('btn-start').addEventListener('click', () => {
+    state.teamA = els.inputSetupA.value || 'TEAM 1';
+    state.teamB = els.inputSetupB.value || 'TEAM 2';
+    state.colorA = els.inputSetupColorA.value || '#4ade80';
+    state.colorB = els.inputSetupColorB.value || '#f87171';
+    state.finalTarget = parseInt(els.inputSetupTarget.value);
+    state.format = selectedFormat;
+    state.status = 'playing';
+
+    saveData();
+    els.setupScreen.classList.add('hidden');
+    els.app.classList.remove('hidden');
+    render();
+  });
+
+  function targetScore() { 
+    return state.currentSet === state.format ? state.finalTarget : 25; 
+  }
+  
   function setsNeeded() { return Math.ceil(state.format / 2); }
 
-  function fmtTime(s) {
-    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-    const p = n => String(n).padStart(2, '0');
-    return h > 0 ? `${h}:${p(m)}:${p(sec)}` : `${p(m)}:${p(sec)}`;
+  function saveData() {
+    localStorage.setItem('vb_teamA', state.teamA);
+    localStorage.setItem('vb_teamB', state.teamB);
+    localStorage.setItem('vb_colorA', state.colorA);
+    localStorage.setItem('vb_colorB', state.colorB);
+    localStorage.setItem('vb_target', state.finalTarget);
   }
 
-  function renderTimer() { els.timer.textContent = fmtTime(state.timeSeconds); }
+  function updateVisuals() {
+    // Update Dynamic CSS Variables for colors
+    document.documentElement.style.setProperty('--bg-left', state.colorA);
+    document.documentElement.style.setProperty('--bg-right', state.colorB);
+
+    // Update Streak Glow effect (max glow limit)
+    let glowA = Math.min(streakA * 8, 40);
+    let glowB = Math.min(streakB * 8, 40);
+    els.scoreA.style.setProperty('--streak-glow-a', glowA + 'px');
+    els.scoreB.style.setProperty('--streak-glow-b', glowB + 'px');
+  }
 
   function pushUndo() {
     undoStack.push(JSON.parse(JSON.stringify(state)));
@@ -299,7 +437,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   function undo() {
     if (undoStack.length === 0) return;
     state = undoStack.pop();
-    els.modal.classList.add('hidden');
+    streakA = 0; streakB = 0; 
+    els.modalSet.classList.add('hidden');
     render();
   }
 
@@ -307,35 +446,35 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     els.nameA.textContent = state.teamA; els.nameB.textContent = state.teamB;
     els.scoreA.textContent = state.scoreA; els.scoreB.textContent = state.scoreB;
     els.setsA.textContent = state.setsA; els.setsB.textContent = state.setsB;
+    
     els.currentSet.textContent = state.currentSet === state.format ? 'FINAL SET' : 'SET ' + state.currentSet;
     els.targetInfo.textContent = 'To ' + targetScore() + ' (Win by 2)';
     
-    const showServe = state.status === 'playing';
-    els.sideA.classList.toggle('serving', showServe && state.server === 'A');
-    els.sideB.classList.toggle('serving', showServe && state.server === 'B');
+    els.sideA.classList.toggle('serving', state.server === 'A');
+    els.sideB.classList.toggle('serving', state.server === 'B');
     
-    document.getElementById('btn-pause').textContent = state.status === 'paused' ? '▶' : '⏸';
-    renderTimer();
-  }
-
-  function startClock() {
-    if (clockHandle) clearInterval(clockHandle);
-    clockHandle = setInterval(() => {
-      if (state.status === 'playing') { state.timeSeconds++; renderTimer(); }
-    }, 1000);
+    updateVisuals();
   }
 
   function addPoint(side) {
     if (state.status !== 'playing') return;
     pushUndo();
-    if (side === 'A') { state.scoreA++; state.server = 'A'; } else { state.scoreB++; state.server = 'B'; }
+    
+    if (side === 'A') { 
+      state.scoreA++; state.server = 'A'; 
+      streakA++; streakB = 0;
+    } else { 
+      state.scoreB++; state.server = 'B'; 
+      streakB++; streakA = 0;
+    }
+    
     render(); checkWin();
   }
 
   function subPoint(side) {
     if (state.status !== 'playing') return;
-    if (side === 'A' && state.scoreA > 0) { pushUndo(); state.scoreA--; }
-    else if (side === 'B' && state.scoreB > 0) { pushUndo(); state.scoreB--; }
+    if (side === 'A' && state.scoreA > 0) { pushUndo(); state.scoreA--; streakA = 0;}
+    else if (side === 'B' && state.scoreB > 0) { pushUndo(); state.scoreB--; streakB = 0;}
     render();
   }
 
@@ -347,84 +486,80 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
     state.status = 'break';
     if (aWin) state.setsA++; else state.setsB++;
-    state.setHistory.push({ a: state.scoreA, b: state.scoreB, w: aWin ? 'A' : 'B', setNum: state.currentSet });
+    
+    streakA = 0; streakB = 0; // Reset streaks on set end
 
     const matchOver = state.setsA >= setsNeeded() || state.setsB >= setsNeeded();
     if (matchOver) state.status = 'finished';
 
     document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
-    document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins the set!`;
-    document.getElementById('modal-overall').textContent = `Match Score: ${state.teamA} (${state.setsA}) - (${state.setsB}) ${state.teamB}`;
+    document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins!`;
     
     if (matchOver) {
       document.getElementById('modal-title').textContent = '🏆 MATCH OVER 🏆';
-      document.getElementById('btn-next-set').textContent = 'New Match';
-      document.getElementById('btn-next-set').onclick = showSetup;
+      document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
+      document.getElementById('btn-next-set').onclick = goToSetup;
     } else {
-      document.getElementById('modal-title').textContent = 'SET ' + state.currentSet + ' FINISHED';
+      document.getElementById('modal-title').textContent = 'SET ' + state.currentSet + ' COMPLETE';
       document.getElementById('btn-next-set').textContent = 'Start Next Set';
       document.getElementById('btn-next-set').onclick = startNextSet;
     }
-    els.modal.classList.remove('hidden');
+    els.modalSet.classList.remove('hidden');
     render();
   }
 
   function startNextSet() {
     if (state.status !== 'break') return;
     undoStack = []; state.currentSet++; state.scoreA = 0; state.scoreB = 0; state.status = 'playing';
-    els.modal.classList.add('hidden'); render();
+    els.modalSet.classList.add('hidden'); render();
   }
 
-  function showSetup() {
-    state.status = 'setup'; els.modal.classList.add('hidden'); els.app.classList.add('hidden'); els.setup.classList.remove('hidden');
+  function goToSetup() {
+    state.currentSet = 1; state.scoreA = 0; state.scoreB = 0; state.setsA = 0; state.setsB = 0; 
+    state.status = 'setup'; undoStack = []; streakA = 0; streakB = 0;
+    
+    els.modalSet.classList.add('hidden'); 
+    els.app.classList.add('hidden');
+    els.setupScreen.classList.remove('hidden');
   }
 
-  // Events Wiring
-  document.getElementById('format-seg').addEventListener('click', function(e) {
-    if(e.target.tagName !== 'BUTTON') return;
-    selectedFormat = parseInt(e.target.dataset.value);
-    Array.from(this.children).forEach(b => b.classList.toggle('active', b === e.target));
-  });
-
-  document.getElementById('btn-start').addEventListener('click', () => {
-    state = { ...state, teamA: document.getElementById('setup-a-name').value || 'Green', teamB: document.getElementById('setup-b-name').value || 'Red', format: selectedFormat, currentSet: 1, scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', setHistory: [], timeSeconds: 0, status: 'playing' };
-    undoStack = []; els.setup.classList.add('hidden'); els.app.classList.remove('hidden');
-    render(); startClock();
-  });
-
+  // Bind Clicks
   document.getElementById('click-a').addEventListener('click', () => addPoint('A'));
   document.getElementById('click-b').addEventListener('click', () => addPoint('B'));
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-undo-modal').addEventListener('click', undo);
   document.getElementById('btn-sub-a').addEventListener('click', () => subPoint('A'));
   document.getElementById('btn-sub-b').addEventListener('click', () => subPoint('B'));
-  document.getElementById('btn-pause').addEventListener('click', () => { state.status = state.status === 'playing' ? 'paused' : 'playing'; render(); });
-  document.getElementById('btn-reset').addEventListener('click', () => { if(confirm('Are you sure you want to restart the entire match?')) showSetup(); });
-  document.getElementById('btn-reset-timer').addEventListener('click', () => { state.timeSeconds = 0; renderTimer(); });
-
-  // History Modal Logic
-  document.getElementById('btn-history').addEventListener('click', () => {
-    const list = document.getElementById('history-list');
-    if(state.setHistory.length === 0) { list.innerHTML = '<div style="text-align:center;color:gray;">No sets completed yet.</div>'; }
-    else {
-      list.innerHTML = state.setHistory.map(h => `
-        <div class="history-item-wrap">
-          <div class="history-time">SET<br>${h.setNum}</div>
-          <div class="history-item">
-            <div class="h-player">${state.teamA}</div>
-            <div class="h-score-box">
-              <span class="h-score-left">${h.a}</span>
-              <span class="h-score-right">${h.b}</span>
-            </div>
-            <div class="h-player" style="text-align:right;">${state.teamB}</div>
-          </div>
-        </div>
-      `).join('');
-    }
-    document.getElementById('history-modal').classList.remove('hidden');
+  
+  document.getElementById('btn-reset').addEventListener('click', () => { 
+    if(confirm('Are you sure you want to end this match and go back to setup?')) goToSetup(); 
   });
 
-  window.closeHistory = function() { document.getElementById('history-modal').classList.add('hidden'); };
+  // Settings Menu (in-game changes)
+  document.getElementById('btn-settings').addEventListener('click', () => {
+    els.inputSettingsA.value = state.teamA;
+    els.inputSettingsB.value = state.teamB;
+    els.inputSettingsColorA.value = state.colorA;
+    els.inputSettingsColorB.value = state.colorB;
+    els.inputSettingsTarget.value = state.finalTarget;
+    els.modalSettings.classList.remove('hidden');
+  });
+
+  document.getElementById('btn-cancel-settings').addEventListener('click', () => {
+    els.modalSettings.classList.add('hidden');
+  });
+
+  document.getElementById('btn-save-settings').addEventListener('click', () => {
+    state.teamA = els.inputSettingsA.value || 'TEAM 1';
+    state.teamB = els.inputSettingsB.value || 'TEAM 2';
+    state.colorA = els.inputSettingsColorA.value || '#4ade80';
+    state.colorB = els.inputSettingsColorB.value || '#f87171';
+    state.finalTarget = parseInt(els.inputSettingsTarget.value);
+    
+    saveData();
+    els.modalSettings.classList.add('hidden');
+    render();
+  });
 
 })();
 </script>
