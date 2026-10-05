@@ -16,6 +16,11 @@
   --accent: #22d3a7;
   --streak-glow-a: 0px;
   --streak-glow-b: 0px;
+
+  /* Naya variables font ra size ko lagi */
+  --app-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --score-size-pc: 45vw; /* Default PC Score Size */
+  --score-size-mobile: 50vh; /* Default Mobile Score Size */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -23,7 +28,7 @@
 body, html { 
   width: 100%; height: 100%; 
   background: #000; overflow: hidden; position: fixed; inset: 0;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+  font-family: var(--app-font); 
   user-select: none;
 }
 
@@ -40,13 +45,22 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 }
 
 /* =======================================================
-   TEXT SIZES - (Height badhaiyeko chha)
+   TEXT SIZES & OVERFLOW FIX
    ======================================================= */
 /* Landscape View (PC/Tablet) */
+.score-box { 
+  display: flex; align-items: center; justify-content: center; 
+  width: 100%; height: 100%; 
+  overflow: hidden; /* Screen bahira jana nadina */
+}
 .score { 
-  font-size: 24vw; /* Badhaiyeko size */
+  font-size: var(--score-size-pc); 
   font-weight: 900; color: white; line-height: 0.8; 
-  transition: text-shadow 0.3s ease, transform 0.1s;
+  transition: text-shadow 0.3s ease, transform 0.1s, font-size 0.3s;
+  /* 10 vanda mathi jada text chepine banauna */
+  text-align: center;
+  max-width: 95%; /* 95% bhanda thulo huna nadine */
+  white-space: nowrap; 
 }
 .player-name { font-size: 8vw; }
 
@@ -57,9 +71,21 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     top: 0; left: 100vw;
     transform: rotate(90deg); transform-origin: top left;
   }
-  .score { font-size: 50vh; } /* Badhaiyeko size */
+  .score { font-size: var(--score-size-mobile); } 
   .player-name { font-size: 8vh; }
 }
+
+/* Double digit (10+) score ko lagi font size sano garaune logic js bata control hunchha,
+   tara CSS le max-width: 95% garera adjust garna madat garcha. */
+.score.double-digit {
+    font-size: calc(var(--score-size-pc) * 0.8); /* PC ma 80% size */
+}
+@media screen and (orientation: portrait) {
+    .score.double-digit {
+        font-size: calc(var(--score-size-mobile) * 0.8); /* Mobile ma 80% size */
+    }
+}
+
 
 /* ---------- MAIN SPLIT SCREEN APP ---------- */
 #main-app { display: flex; flex-direction: row; height: 100%; width: 100%; position: relative; }
@@ -67,6 +93,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .side { 
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
   position: relative; cursor: pointer; transition: background-color 0.3s, filter 0.2s; 
+  overflow: hidden; /* Side bhanda bahira jana nadina */
 }
 .side:active { filter: brightness(0.9); }
 .side-left { background-color: var(--bg-left); }
@@ -95,8 +122,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 }
 @keyframes neon-pulse { 0% { opacity: 0.8; } 100% { opacity: 1; transform: scale(1.02); } }
 
-/* Score Text */
-.score-box { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+/* Score Text Glow */
 .score:active { transform: scale(0.95); }
 .score-left-glow { text-shadow: 0 0 var(--streak-glow-a) #fff, 0 0 calc(var(--streak-glow-a) * 1.5) #fff, 0 10px 20px rgba(0,0,0,0.5); }
 .score-right-glow { text-shadow: 0 0 var(--streak-glow-b) #fff, 0 0 calc(var(--streak-glow-b) * 1.5) #fff, 0 10px 20px rgba(0,0,0,0.5); }
@@ -245,6 +271,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
       </select>
     </div>
 
+    <!-- Font Ra Size Setup ma ni rakhna sakkincha tara ahile settings bata haleko chu, simple banauna -->
+
     <button class="btn-primary" id="btn-start">Start Match 🚀</button>
   </div>
 </div>
@@ -333,6 +361,30 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   <div id="modal-settings" class="app-overlay hidden">
     <div class="box">
       <div class="modal-title">Match Settings</div>
+      
+      <!-- Naya Font ra Size Settings -->
+      <div class="team-inputs" style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+        <div class="field">
+          <label>App Font Style</label>
+          <select id="settings-font">
+            <option value="'Segoe UI', system-ui, -apple-system, sans-serif">Default (Modern)</option>
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Courier New', Courier, monospace">Courier (Typewriter)</option>
+            <option value="Georgia, serif">Georgia (Classic)</option>
+            <option value="'Impact', sans-serif">Impact (Bold)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Score Font Size</label>
+          <select id="settings-size">
+            <option value="normal">Normal</option>
+            <option value="large" selected>Large (Default)</option>
+            <option value="xlarge">Extra Large</option>
+          </select>
+        </div>
+      </div>
+
+
       <div class="team-inputs">
         <div class="field">
           <label>Left Team Name & Color</label>
@@ -391,6 +443,10 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   // Match History System
   let allMatchesHistory = JSON.parse(localStorage.getItem('vb_match_history')) || [];
 
+  // App Settings (Font and Size)
+  let appFont = localStorage.getItem('vb_font') || "'Segoe UI', system-ui, -apple-system, sans-serif";
+  let appScoreSize = localStorage.getItem('vb_size') || "large";
+
   // State
   let selectedFormat = 5; 
   let state = {
@@ -430,8 +486,29 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     inputSettingsB: document.getElementById('settings-b-name'),
     inputSettingsColorA: document.getElementById('settings-a-color'),
     inputSettingsColorB: document.getElementById('settings-b-color'),
-    inputSettingsTarget: document.getElementById('settings-target')
+    inputSettingsTarget: document.getElementById('settings-target'),
+    inputSettingsFont: document.getElementById('settings-font'),
+    inputSettingsSize: document.getElementById('settings-size')
   };
+
+  // Apply Font and Size Initially
+  function applyFontAndSize() {
+      document.documentElement.style.setProperty('--app-font', appFont);
+      
+      let pcSize, mobileSize;
+      if (appScoreSize === 'normal') {
+          pcSize = '35vw'; mobileSize = '40vh';
+      } else if (appScoreSize === 'xlarge') {
+          pcSize = '55vw'; mobileSize = '60vh';
+      } else {
+          // Default large
+          pcSize = '45vw'; mobileSize = '50vh';
+      }
+
+      document.documentElement.style.setProperty('--score-size-pc', pcSize);
+      document.documentElement.style.setProperty('--score-size-mobile', mobileSize);
+  }
+  applyFontAndSize();
 
   // Setup History Toggle
   document.getElementById('btn-show-history').addEventListener('click', () => {
@@ -487,6 +564,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     localStorage.setItem('vb_colorA', state.colorA);
     localStorage.setItem('vb_colorB', state.colorB);
     localStorage.setItem('vb_target', state.finalTarget);
+    localStorage.setItem('vb_font', appFont);
+    localStorage.setItem('vb_size', appScoreSize);
   }
 
   function saveMatchHistory() {
@@ -532,6 +611,13 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     
     els.sideA.classList.toggle('serving', state.server === 'A');
     els.sideB.classList.toggle('serving', state.server === 'B');
+
+    // Handle double digits for font sizing
+    if (state.scoreA >= 10) els.scoreA.classList.add('double-digit');
+    else els.scoreA.classList.remove('double-digit');
+
+    if (state.scoreB >= 10) els.scoreB.classList.add('double-digit');
+    else els.scoreB.classList.remove('double-digit');
     
     updateVisuals();
   }
@@ -623,6 +709,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     els.inputSettingsColorA.value = state.colorA;
     els.inputSettingsColorB.value = state.colorB;
     els.inputSettingsTarget.value = state.finalTarget;
+    els.inputSettingsFont.value = appFont;
+    els.inputSettingsSize.value = appScoreSize;
     els.modalSettings.classList.remove('hidden');
   });
 
@@ -637,6 +725,10 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     state.colorB = els.inputSettingsColorB.value || '#f87171';
     state.finalTarget = parseInt(els.inputSettingsTarget.value);
     
+    appFont = els.inputSettingsFont.value;
+    appScoreSize = els.inputSettingsSize.value;
+
+    applyFontAndSize();
     saveData();
     els.modalSettings.classList.add('hidden');
     render();
