@@ -10,6 +10,9 @@
 <title>Pro Sports Scoreboard</title>
 <!-- PWA Manifest embedded as Data URI so it works as a single file -->
 <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Pro%20Scoreboard%22%2C%22short_name%22%3A%22Scoreboard%22%2C%22description%22%3A%22Volleyball%20and%20Football%20Scoreboard%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23111827%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%2322d3a7%27%2F%3E%3Ctext%20x%3D%2720%27%20y%3D%2770%27%20font-size%3D%2760%27%3E%E2%9A%BD%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D'>
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2322d3a7'/><text x='20' y='70' font-size='60'>⚽</text></svg>">
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%2322d3a7'/><text x='20' y='70' font-size='60'>⚽</text></svg>">
+
 
 <style>
 :root {
@@ -23,8 +26,8 @@
   --streak-glow-a: 0px;
   --streak-glow-b: 0px;
   --app-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --score-size-pc: 40vw; 
-  --score-size-mobile: 45vh; 
+  --score-size-pc: 35vw; /* Adjusted for better centering */
+  --score-size-mobile: 40vh; /* Adjusted for better centering */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -89,9 +92,9 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     .score.double-digit { font-size: calc(var(--score-size-mobile) * 0.8); }
 }
 
-/* FOOTBALL LAYOUT FIXES */
-body.sport-football .side-left .score-box { justify-content: flex-start; padding-left: 5%; }
-body.sport-football .side-right .score-box { justify-content: flex-end; padding-right: 5%; }
+/* FOOTBALL LAYOUT FIXES - CENTERED */
+body.sport-football .side-left .score-box { justify-content: center; padding-left: 0; }
+body.sport-football .side-right .score-box { justify-content: center; padding-right: 0; }
 body.sport-football .side-left .player-info { top: 5%; z-index: 20; opacity: 0.8;}
 body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.8;}
 
@@ -224,6 +227,7 @@ body.sport-football .timeline-btn-only-fb { display: block; }
 .segmented button { flex: 1; padding: 10px 4px; border-radius: 8px; font-size: .8rem; font-weight: 800; color: #9ca3af; transition: 0.2s;}
 .segmented button.active { background: var(--accent); color: #000; box-shadow: 0 0 10px rgba(34, 211, 167, 0.5);}
 .btn-primary { width: 100%; padding: 12px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:5px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
+.btn-danger { width: 100%; padding: 12px; border-radius: 12px; background: #ef4444; color: #fff; font-size: 1rem; font-weight: 900; margin-top:5px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);}
 .btn-ghost { width: 100%; padding: 10px; border-radius: 12px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; font-size: .85rem; font-weight: 800;}
 
 /* Sport Selector Style */
@@ -232,9 +236,12 @@ body.sport-football .timeline-btn-only-fb { display: block; }
 .sport-selector button.active { background: rgba(34, 211, 167, 0.2); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(34,211,167,0.3);}
 
 /* History Modal */
-#history-list-container { max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; font-size: 0.8rem;}
+#history-list-container { max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; font-size: 0.8rem;}
 .history-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
 .fb-goal-list { font-size: 0.75rem; color: #aaa; margin-top: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 5px;}
+.match-status { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 10px;}
+.status-completed { background: #10b981; color: white; }
+.status-incomplete { background: #f59e0b; color: white; }
 
 /* Toast Notification */
 #toast {
@@ -264,7 +271,8 @@ body.sport-football .timeline-btn-only-fb { display: block; }
 
     <div id="setup-history-area" class="hidden" style="margin-bottom: 15px;">
       <div id="history-list-container"></div>
-      <button class="btn-ghost" id="btn-hide-history" style="border-color: red; color: red;">X Close History</button>
+      <button class="btn-danger" id="btn-clear-history" style="margin-bottom: 5px;">Clear History</button>
+      <button class="btn-ghost" id="btn-hide-history" style="border-color: #9ca3af; color: #9ca3af;">Close History</button>
     </div>
 
     <div class="team-inputs">
@@ -342,6 +350,7 @@ body.sport-football .timeline-btn-only-fb { display: block; }
           <div class="timer-hint">Tap to Play/Pause</div>
       </div>
       <button id="btn-end-half">End Half</button>
+      <button id="btn-end-match" style="margin-top: 5px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">End Match</button>
     </div>
     
     <!-- Left Side -->
@@ -514,7 +523,7 @@ installBtn.addEventListener('click', async () => {
   let state = {
     teamA: 'TEAM 1', teamB: 'TEAM 2', colorA: '#4ade80', colorB: '#f87171',
     format: 3, currentSet: 1, scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', status: 'setup',
-    finalTarget: 15
+    finalTarget: 15, isComplete: false
   };
   
   let undoStack = [];
@@ -566,32 +575,44 @@ installBtn.addEventListener('click', async () => {
   };
 
   // Setup History Toggle
+  function renderHistory() {
+      let container = document.getElementById('history-list-container');
+      if(allMatchesHistory.length === 0){
+        container.innerHTML = "<p style='text-align:center;'>No match history found.</p>";
+      } else {
+        container.innerHTML = allMatchesHistory.slice().reverse().map(m => {
+          let fbDetails = '';
+          if(m.sport === 'football' && m.goals && m.goals.length > 0) {
+              let list = m.goals.map(g => `${g.team === 'A' ? m.teamA : m.teamB} (${g.time})`).join(', ');
+              fbDetails = `<div class="fb-goal-list">Goals: ${list}</div>`;
+          } else if (m.sport === 'football') {
+              fbDetails = `<div class="fb-goal-list">No goals scored.</div>`;
+          }
+          
+          let statusBadge = m.isComplete 
+              ? `<span class="match-status status-completed">Completed</span>`
+              : `<span class="match-status status-incomplete">Incomplete</span>`;
+              
+          return `
+          <div style="border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 8px;">
+            <div class="history-item" style="border:none; padding:0; align-items: center;">
+              <div>
+                  <span>[${m.sport === 'football' ? '⚽' : '🏐'}] ${m.teamA} vs ${m.teamB}</span>
+                  ${statusBadge}
+              </div>
+              <span style="color:var(--accent); font-weight:bold; font-size: 1.1em;">
+                ${m.sport === 'football' ? m.scoreA + ' - ' + m.scoreB : m.setsA + ' - ' + m.setsB}
+              </span>
+            </div>
+            <div style="font-size: 0.7rem; color: #777;">${m.date}</div>
+            ${fbDetails}
+          </div>`;
+        }).join('');
+      }
+  }
+
   document.getElementById('btn-show-history').addEventListener('click', () => {
-    let container = document.getElementById('history-list-container');
-    if(allMatchesHistory.length === 0){
-      container.innerHTML = "<p style='text-align:center;'>Kunai pani history chhaina.</p>";
-    } else {
-      container.innerHTML = allMatchesHistory.slice().reverse().map(m => {
-        let fbDetails = '';
-        if(m.sport === 'football' && m.goals && m.goals.length > 0) {
-            let list = m.goals.map(g => `${g.team === 'A' ? m.teamA : m.teamB} (${g.time})`).join(', ');
-            fbDetails = `<div class="fb-goal-list">Goals: ${list}</div>`;
-        } else if (m.sport === 'football') {
-            fbDetails = `<div class="fb-goal-list">No goals scored.</div>`;
-        }
-        return `
-        <div style="border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 8px;">
-          <div class="history-item" style="border:none; padding:0;">
-            <span>[${m.sport === 'football' ? '⚽' : '🏐'}] ${m.teamA} vs ${m.teamB}</span>
-            <span style="color:var(--accent); font-weight:bold;">
-              ${m.sport === 'football' ? m.scoreA + ' - ' + m.scoreB : m.setsA + ' - ' + m.setsB}
-            </span>
-          </div>
-          <div style="font-size: 0.7rem; color: #777;">${m.date}</div>
-          ${fbDetails}
-        </div>`;
-      }).join('');
-    }
+    renderHistory();
     document.getElementById('setup-history-area').classList.remove('hidden');
     document.getElementById('btn-show-history').classList.add('hidden');
   });
@@ -600,13 +621,21 @@ installBtn.addEventListener('click', async () => {
     document.getElementById('setup-history-area').classList.add('hidden');
     document.getElementById('btn-show-history').classList.remove('hidden');
   });
+  
+  document.getElementById('btn-clear-history').addEventListener('click', () => {
+      if(confirm("Are you sure you want to delete all match history?")) {
+          allMatchesHistory = [];
+          localStorage.setItem('vb_match_history', JSON.stringify(allMatchesHistory));
+          renderHistory();
+      }
+  });
 
   function applyFontAndSize() {
       document.documentElement.style.setProperty('--app-font', appFont);
       let pcSize, mobileSize;
-      if (appScoreSize === 'normal') { pcSize = '30vw'; mobileSize = '35vh'; } 
-      else if (appScoreSize === 'xlarge') { pcSize = '50vw'; mobileSize = '55vh'; } 
-      else { pcSize = '40vw'; mobileSize = '45vh'; }
+      if (appScoreSize === 'normal') { pcSize = '25vw'; mobileSize = '30vh'; } 
+      else if (appScoreSize === 'xlarge') { pcSize = '45vw'; mobileSize = '50vh'; } 
+      else { pcSize = '35vw'; mobileSize = '40vh'; }
       document.documentElement.style.setProperty('--score-size-pc', pcSize);
       document.documentElement.style.setProperty('--score-size-mobile', mobileSize);
   }
@@ -640,6 +669,7 @@ installBtn.addEventListener('click', async () => {
     state.finalTarget = parseInt(els.inputSetupTarget.value);
     state.format = selectedFormat;
     state.status = 'playing';
+    state.isComplete = false;
     
     footballSeconds = 0;
     isTimerRunning = false;
@@ -661,7 +691,8 @@ installBtn.addEventListener('click', async () => {
   });
 
   document.getElementById('btn-top-back').addEventListener('click', () => {
-      if(confirm('Are you sure you want to go back? Current match will be saved to history.')) {
+      if(confirm('Are you sure you want to go back? Current match will be saved to history as incomplete.')) {
+          state.isComplete = false;
           saveMatchHistory();
           goToSetup();
       }
@@ -692,15 +723,21 @@ installBtn.addEventListener('click', async () => {
   }
 
   function saveMatchHistory() {
+    // Only save if there was some action (score > 0 or sets > 0 or goals scored)
+    if(state.scoreA === 0 && state.scoreB === 0 && state.setsA === 0 && state.setsB === 0 && footballGoalsList.length === 0 && state.currentSet === 1) {
+        return; // Don't save completely empty matches
+    }
+      
     allMatchesHistory.push({
       sport: sportType,
       teamA: state.teamA, teamB: state.teamB,
       scoreA: state.scoreA, scoreB: state.scoreB,
       setsA: state.setsA, setsB: state.setsB,
       goals: sportType === 'football' ? JSON.parse(JSON.stringify(footballGoalsList)) : null,
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString(),
+      isComplete: state.isComplete
     });
-    if(allMatchesHistory.length > 20) allMatchesHistory.shift();
+    if(allMatchesHistory.length > 30) allMatchesHistory.shift(); // Keep last 30
     localStorage.setItem('vb_match_history', JSON.stringify(allMatchesHistory));
   }
 
@@ -777,6 +814,36 @@ installBtn.addEventListener('click', async () => {
           
           state.currentSet++; 
           render();
+      }
+  });
+  
+  // End Match Button Logic for Football
+  document.getElementById('btn-end-match').addEventListener('click', () => {
+      if(confirm("End the football match now?")) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          state.status = 'finished';
+          state.isComplete = true;
+          
+          let aWin = state.scoreA > state.scoreB;
+          let bWin = state.scoreB > state.scoreA;
+          let draw = state.scoreA === state.scoreB;
+          
+          document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
+          if(draw) {
+              document.getElementById('modal-desc').textContent = `Match Drawn!`;
+          } else {
+              document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins!`;
+          }
+          
+          document.getElementById('modal-title').textContent = '⚽ FULL TIME ⚽';
+          document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
+          document.getElementById('btn-next-set').onclick = () => {
+              saveMatchHistory();
+              goToSetup();
+          };
+          
+          els.modalSet.classList.remove('hidden');
       }
   });
 
@@ -888,6 +955,7 @@ installBtn.addEventListener('click', async () => {
     const matchOver = state.setsA >= setsNeeded() || state.setsB >= setsNeeded();
     if (matchOver) {
         state.status = 'finished';
+        state.isComplete = true;
         saveMatchHistory();
     }
 
@@ -943,6 +1011,7 @@ installBtn.addEventListener('click', async () => {
   document.getElementById('btn-sub-b').addEventListener('click', () => subPoint('B'));
   document.getElementById('btn-reset').addEventListener('click', () => { 
     if(confirm('End match and go to setup? (Game end garne?)')) {
+        state.isComplete = false;
         saveMatchHistory();
         goToSetup(); 
     }
