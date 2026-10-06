@@ -3,8 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
-<title>Pro Volleyball Scoreboard</title>
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Pro Sports Scoreboard</title>
+<!-- PWA Manifest embedded as Data URI so it works as a single file -->
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Pro%20Scoreboard%22%2C%22short_name%22%3A%22Scoreboard%22%2C%22description%22%3A%22Volleyball%20and%20Football%20Scoreboard%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23111827%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ccircle%20cx%3D%2750%27%20cy%3D%2750%27%20r%3D%2750%27%20fill%3D%27%2322d3a7%27%2F%3E%3Ctext%20x%3D%2720%27%20y%3D%2770%27%20font-size%3D%2760%27%3E%E2%9A%BD%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D'>
+
 <style>
 :root {
   --bg-left: #4ade80; 
@@ -16,11 +22,9 @@
   --accent: #22d3a7;
   --streak-glow-a: 0px;
   --streak-glow-b: 0px;
-
-  /* Naya variables font ra size ko lagi */
   --app-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --score-size-pc: 45vw; /* Default PC Score Size */
-  --score-size-mobile: 50vh; /* Default Mobile Score Size */
+  --score-size-pc: 40vw; 
+  --score-size-mobile: 45vh; 
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -35,86 +39,81 @@ body, html {
 button { font-family: inherit; cursor: pointer; outline: none; border: 0; background: none; color: inherit; }
 .hidden { display: none !important; }
 
-/* =======================================================
-   FORCE LANDSCAPE CSS (FOR MAIN APP ONLY)
-   ======================================================= */
+/* INSTALL BUTTON */
+#install-app-btn {
+  background: #10b981; color: white; padding: 10px 20px; border-radius: 12px;
+  font-weight: bold; margin-bottom: 15px; width: 100%; text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); display: none; /* Hidden by default */
+}
+
+/* FORCE LANDSCAPE CSS */
 #main-app-wrapper {
   position: absolute; top: 0; left: 0;
   width: 100vw; height: 100vh; overflow: hidden; background: #000;
   display: flex; flex-direction: column;
 }
 
-/* =======================================================
-   TEXT SIZES & OVERFLOW FIX
-   ======================================================= */
-/* Landscape View (PC/Tablet) */
-.score-box { 
-  display: flex; align-items: center; justify-content: center; 
-  width: 100%; height: 100%; 
-  overflow: hidden; /* Screen bahira jana nadina */
+/* BACK BUTTON */
+#btn-top-back {
+  position: absolute; top: env(safe-area-inset-top, 15px); left: env(safe-area-inset-left, 20px); z-index: 100;
+  background: rgba(0,0,0,0.5); color: white; padding: 10px 15px;
+  border-radius: 12px; font-weight: bold; font-size: 1.2rem;
+  border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);
 }
+#btn-top-back:active { transform: scale(0.9); }
+
+/* MAIN SCORE BOX */
+.score-box { 
+    display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; 
+    position: absolute; inset: 0;
+ }
 .score { 
   font-size: var(--score-size-pc); 
   font-weight: 900; color: white; line-height: 0.8; 
   transition: text-shadow 0.3s ease, transform 0.1s, font-size 0.3s;
-  /* 10 vanda mathi jada text chepine banauna */
-  text-align: center;
-  max-width: 95%; /* 95% bhanda thulo huna nadine */
-  white-space: nowrap; 
+  text-align: center; max-width: 95%; white-space: nowrap; 
 }
-.player-name { font-size: 8vw; }
+.player-name { font-size: 6vw; white-space: nowrap; } 
 
-/* Portrait View (Mobile force-landscape) */
 @media screen and (orientation: portrait) {
   #main-app-wrapper {
-    width: 100vh; height: 100vw;
-    top: 0; left: 100vw;
+    width: 100vh; height: 100vw; top: 0; left: 100vw;
     transform: rotate(90deg); transform-origin: top left;
   }
   .score { font-size: var(--score-size-mobile); } 
-  .player-name { font-size: 8vh; }
+  .player-name { font-size: 6vh; }
 }
 
-/* Double digit (10+) score ko lagi font size sano garaune logic js bata control hunchha,
-   tara CSS le max-width: 95% garera adjust garna madat garcha. */
-.score.double-digit {
-    font-size: calc(var(--score-size-pc) * 0.8); /* PC ma 80% size */
-}
+.score.double-digit { font-size: calc(var(--score-size-pc) * 0.8); }
 @media screen and (orientation: portrait) {
-    .score.double-digit {
-        font-size: calc(var(--score-size-mobile) * 0.8); /* Mobile ma 80% size */
-    }
+    .score.double-digit { font-size: calc(var(--score-size-mobile) * 0.8); }
 }
 
+/* FOOTBALL LAYOUT FIXES */
+body.sport-football .side-left .score-box { justify-content: flex-start; padding-left: 5%; }
+body.sport-football .side-right .score-box { justify-content: flex-end; padding-right: 5%; }
+body.sport-football .side-left .player-info { top: 5%; z-index: 20; opacity: 0.8;}
+body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.8;}
 
-/* ---------- MAIN SPLIT SCREEN APP ---------- */
+/* MAIN SPLIT SCREEN APP */
 #main-app { display: flex; flex-direction: row; height: 100%; width: 100%; position: relative; }
-
 .side { 
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-  position: relative; cursor: pointer; transition: background-color 0.3s, filter 0.2s; 
-  overflow: hidden; /* Side bhanda bahira jana nadina */
+  position: relative; cursor: pointer; transition: background-color 0.3s, filter 0.2s; overflow: hidden; 
 }
 .side:active { filter: brightness(0.9); }
 .side-left { background-color: var(--bg-left); }
 .side-right { background-color: var(--bg-right); }
 
-/* Ball / Serve Indicator - Position changed to side */
-.serve-indicator { 
-  position: absolute; 
-  top: 15%; 
-  font-size: 3rem; 
-  opacity: 0; 
-  transition: 0.3s; 
-  z-index: 10;
-}
+/* Serve Indicator */
+.serve-indicator { position: absolute; top: 15%; font-size: 3rem; opacity: 0; transition: 0.3s; z-index: 10;}
 .side-left .serve-indicator { right: 10%; }
 .side-right .serve-indicator { left: 10%; }
 .serving .serve-indicator { opacity: 1; animation: bounce 1s infinite alternate; }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
-/* Player Info */
-.player-info { text-align: center; color: white; position: absolute; top: 3%; z-index: 5; width: 100%; }
+/* Player Info Default (Volleyball) */
+.player-info { text-align: center; color: white; position: absolute; top: 5%; z-index: 5; width: 100%; }
 .player-name { 
   font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
   animation: neon-pulse 1.5s infinite alternate;
@@ -134,42 +133,66 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   box-shadow: var(--pill-shadow); display: flex; align-items: center; justify-content: center; z-index: 50; 
 }
 
-/* Center Set Pill (Top) - Only Set number */
+/* Center Top Pill */
 .center-sets { 
-  top: 15px; padding: 10px 25px; border-radius: 30px; 
+  top: env(safe-area-inset-top, 15px); padding: 10px 25px; border-radius: 30px; 
   text-align: center; background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 4px 10px rgba(0,0,0,0.2);
 }
 #current-set-label { font-size: 1.5rem; font-weight: 900; color: #111827; letter-spacing: 1px;}
 
-/* CENTER SETS WON */
+/* CENTER SETS WON (VOLLEYBALL) */
 .sets-won-center {
   top: 50%; left: 50%; transform: translate(-50%, -50%);
   flex-direction: column; padding: 10px 25px; border-radius: 20px;
   background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 60;
-  font-size: 2.9rem; 
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 60; font-size: 2.9rem; 
 }
 .sets-won-title { font-size: 0.6em; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
 .sets-won-scores { font-weight: 900; font-size: 1.2em; display: flex; gap: 15px; align-items: center;}
 .set-score-a { color: var(--bg-left); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 .set-score-b { color: var(--bg-right); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
+/* CENTER TIMER (FOOTBALL) */
+.football-timer-center {
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  flex-direction: column; padding: 15px 35px; border-radius: 25px;
+  background: rgba(0,0,0,0.9); color: white; border: 2px solid var(--accent);
+  box-shadow: 0 0 20px rgba(34, 211, 167, 0.5); z-index: 60; 
+}
+.timer-interactive { cursor: pointer; display: flex; flex-direction: column; align-items: center;}
+.timer-title { font-size: 1rem; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; text-align: center;}
+.timer-clock { font-size: 4rem; font-weight: 900; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+.timer-hint { font-size: 0.7rem; color: #555; text-align: center; margin-top: 5px;}
+.timer-interactive:active { transform: scale(0.95); }
+
+#btn-end-half {
+    margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+    color: white; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;
+}
+#btn-end-half:active { background: rgba(255,255,255,0.3); }
+
+/* FOOTBALL MATCH TIMELINE (Modal) */
+#modal-timeline { z-index: 150; }
+.football-timeline {
+  background: #111827; color: white; border-radius: 15px; padding: 20px;
+  width: 90%; max-width: 400px; font-size: 1rem; text-align: center;
+  border: 1px solid rgba(255,255,255,0.1); max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,.9);
+}
+.timeline-title { font-size: 1.2rem; color: var(--accent); text-transform: uppercase; font-weight: bold; margin-bottom: 15px;}
+.timeline-entry { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;}
+
 /* Bottom Menu Pill */
-.bottom-controls { bottom: 15px; padding: 10px 25px; gap: 25px; }
+.bottom-controls { bottom: env(safe-area-inset-bottom, 15px); padding: 10px 25px; gap: 20px; }
 .bottom-controls button { font-size: 1.5rem; color: var(--icon-color); transition: 0.2s; font-weight: 900;}
 .bottom-controls button:active { transform: scale(0.85); }
+.timeline-btn-only-fb { display: none; }
+body.sport-football .timeline-btn-only-fb { display: block; }
 
 /* ---------- OVERLAYS ---------- */
-#setup-screen {
-  position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; 
-  padding: 20px; background: rgba(0,0,0,.95); 
-}
-
-.app-overlay { 
-  position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; 
-  padding: 20px; background: rgba(0,0,0,.85); backdrop-filter: blur(8px); 
-}
+#setup-screen { position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.95); }
+.app-overlay { position: absolute; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.85); backdrop-filter: blur(8px); }
 
 .box { 
   width: 100%; max-width: 440px; color: white; background: #111827; 
@@ -181,17 +204,20 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .modal-title { text-align: center; font-size: 1.2rem; font-weight: 900; margin-bottom: 15px; color: var(--accent); text-transform: uppercase;}
 .field { margin-bottom: 10px; }
 .field > label { display: block; margin-bottom: 5px; font-size: .75rem; font-weight: 800; color: #9ca3af; text-transform: uppercase;}
-.field select, .color-picker-row input[type=text] { 
+.field select, .color-picker-row input[type=text], .field input[type=number] { 
   width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); 
   background: rgba(0,0,0,0.3); color: white; font-size: 0.95rem; font-weight: bold; outline: none; 
 }
-.color-picker-row { display: flex; gap: 8px; }
+
+/* Matched Color Picker Style */
+.color-picker-row { display: flex; gap: 8px; align-items: center; }
+.color-picker-row input[type=text] { flex: 1; }
 .color-picker-row input[type=color] { 
-  width: 45px; height: 100%; min-height: 40px; border: none; border-radius: 10px; 
-  cursor: pointer; background: transparent; 
+  width: 40px; height: 40px; border: none; border-radius: 8px; 
+  cursor: pointer; background: transparent; padding: 0; 
 }
 .color-picker-row input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
-.color-picker-row input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.5); border-radius: 10px; }
+.color-picker-row input[type=color]::-webkit-color-swatch { border: 2px solid rgba(255,255,255,0.5); border-radius: 8px; }
 
 .team-inputs { display: flex; flex-direction: column; gap: 8px; }
 .segmented { display: flex; gap: 5px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,0.2); }
@@ -200,28 +226,23 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 .btn-primary { width: 100%; padding: 12px; border-radius: 12px; background: #10b981; color: #fff; font-size: 1rem; font-weight: 900; margin-top:5px; text-transform: uppercase; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);}
 .btn-ghost { width: 100%; padding: 10px; border-radius: 12px; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; font-size: .85rem; font-weight: 800;}
 
-/* Guide Overlay */
-#guide-overlay {
-  position: absolute; inset: 0; z-index: 200; 
-  background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
-  display: flex; flex-direction: column;
-}
-.guide-pointer {
-  position: absolute; color: white; font-weight: bold; text-shadow: 0 2px 4px black;
-  display: flex; flex-direction: column; align-items: center;
-}
-.guide-arrow { font-size: 2rem; color: #facc15; animation: point 1s infinite alternate; }
-@keyframes point { from { transform: translateY(0); } to { transform: translateY(-10px); } }
-.guide-text { background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 8px; border: 1px solid #facc15; text-align: center; font-size: 0.9rem;}
-.close-guide-btn {
-  position: absolute; top: 20px; right: 20px; background: red; color: white; 
-  border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; 
-  font-weight: bold; cursor: pointer; z-index: 210; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
+/* Sport Selector Style */
+.sport-selector { display: flex; gap: 10px; margin-bottom: 15px;}
+.sport-selector button { flex: 1; padding: 15px; border-radius: 15px; font-size: 1.2rem; font-weight: 900; background: rgba(255,255,255,0.1); color: #ccc; border: 2px solid transparent; transition: 0.3s;}
+.sport-selector button.active { background: rgba(34, 211, 167, 0.2); color: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px rgba(34,211,167,0.3);}
 
 /* History Modal */
-#history-list-container { max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px;}
-.history-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; font-size: 0.9rem;}
+#history-list-container { max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px; font-size: 0.8rem;}
+.history-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #333; }
+.fb-goal-list { font-size: 0.75rem; color: #aaa; margin-top: 5px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 5px;}
+
+/* Toast Notification */
+#toast {
+  position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.9); color: white; padding: 10px 20px;
+  border-radius: 20px; font-weight: bold; z-index: 300;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
 </style>
 </head>
 <body>
@@ -229,13 +250,21 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 <!-- ============ SETUP SCREEN ============ -->
 <div id="setup-screen">
   <div class="box">
-    <div class="modal-title">Volleyball Match Setup</div>
+    <div class="modal-title">Select Sport</div>
     
-    <button class="btn-ghost" id="btn-show-history" style="margin-bottom: 15px;">📜 Match History Herna</button>
+    <!-- Install App Button (Shows if PWA is installable) -->
+    <button id="install-app-btn">⬇️ Install App on Phone</button>
+    
+    <div class="sport-selector" id="sport-seg">
+      <button type="button" data-sport="volleyball" class="active">🏐 Volleyball</button>
+      <button type="button" data-sport="football">⚽ Football</button>
+    </div>
 
-    <div id="setup-history-area" class="hidden">
+    <button class="btn-ghost" id="btn-show-history" style="margin-bottom: 15px;">📜 Match History</button>
+
+    <div id="setup-history-area" class="hidden" style="margin-bottom: 15px;">
       <div id="history-list-container"></div>
-      <button class="btn-ghost" id="btn-hide-history" style="border-color: red; color: red;">X Banda Garna</button>
+      <button class="btn-ghost" id="btn-hide-history" style="border-color: red; color: red;">X Close History</button>
     </div>
 
     <div class="team-inputs">
@@ -255,23 +284,29 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
       </div>
     </div>
     
-    <div class="field" style="margin-top: 10px;">
-      <label>Match Format</label>
-      <div class="segmented" id="format-seg">
-        <button type="button" data-value="3">Best of 3</button>
-        <button type="button" data-value="5" class="active">Best of 5</button>
+    <div id="vb-settings">
+      <div class="field" style="margin-top: 10px;">
+        <label>Match Format (Volleyball)</label>
+        <div class="segmented" id="format-seg">
+          <button type="button" data-value="3" class="active">Best of 3</button>
+          <button type="button" data-value="5">Best of 5</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Final Set Target Score</label>
+        <select id="setup-target">
+          <option value="15">Play to 15</option>
+          <option value="25">Play to 25</option>
+        </select>
       </div>
     </div>
 
-    <div class="field">
-      <label>Final Set Target Score</label>
-      <select id="setup-target">
-        <option value="15">Play to 15</option>
-        <option value="25">Play to 25</option>
-      </select>
+    <div id="fb-settings" class="hidden">
+      <div class="field" style="margin-top: 10px;">
+        <label>Half Duration (Minutes)</label>
+        <input type="number" id="setup-fb-time" value="45" min="1" max="90">
+      </div>
     </div>
-
-    <!-- Font Ra Size Setup ma ni rakhna sakkincha tara ahile settings bata haleko chu, simple banauna -->
 
     <button class="btn-primary" id="btn-start">Start Match 🚀</button>
   </div>
@@ -280,13 +315,16 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 <!-- ============ MAIN UI APP ============ -->
 <div id="main-app-wrapper" class="hidden">
   
+  <button id="btn-top-back">← Back</button>
+  <div id="toast">Timer is paused! (टाइम सुरु गर्नुहोस)</div>
+
   <div id="main-app">
-    <!-- Top Center Set Info -->
+    <!-- Top Center Info -->
     <div class="floating-pill center-sets">
       <div id="current-set-label">SET 1</div>
     </div>
 
-    <!-- CENTER SETS WON PILL -->
+    <!-- CENTER UI: SETS WON (VOLLEYBALL) -->
     <div class="floating-pill sets-won-center" id="sets-won-ui">
       <div class="sets-won-title">SETS WON</div>
       <div class="sets-won-scores">
@@ -296,9 +334,19 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
       </div>
     </div>
 
+    <!-- CENTER UI: TIMER (FOOTBALL) -->
+    <div class="floating-pill football-timer-center hidden" id="football-timer-ui">
+      <div class="timer-interactive" id="timer-interactive">
+          <div class="timer-title" id="timer-status">PAUSED</div>
+          <div class="timer-clock" id="timer-display">00:00</div>
+          <div class="timer-hint">Tap to Play/Pause</div>
+      </div>
+      <button id="btn-end-half">End Half</button>
+    </div>
+    
     <!-- Left Side -->
     <div class="side side-left" id="side-a">
-      <div class="serve-indicator">🏐</div>
+      <div class="serve-indicator vb-only">🏐</div>
       <div class="player-info">
         <div class="player-name name-left" id="name-a">TEAM 1</div>
       </div>
@@ -309,7 +357,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
     <!-- Right Side -->
     <div class="side side-right" id="side-b">
-      <div class="serve-indicator">🏐</div>
+      <div class="serve-indicator vb-only">🏐</div>
       <div class="player-info">
         <div class="player-name name-right" id="name-b">TEAM 2</div>
       </div>
@@ -322,55 +370,46 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     <div class="floating-pill bottom-controls" id="bottom-ui">
       <button id="btn-settings" title="Settings">⚙️</button>
       <button id="btn-undo" title="Undo">↩</button>
-      <button id="btn-sub-a" title="Minus Left Point" style="color:var(--icon-color); font-weight:800">-1 Left</button>
-      <button id="btn-sub-b" title="Minus Right Point" style="color:var(--icon-color); font-weight:800">-1 Right</button>
+      <button id="btn-timeline" class="timeline-btn-only-fb" title="Goal Timeline">⏱️</button>
+      <button id="btn-sub-a" title="Minus Left Point" style="color:var(--icon-color); font-weight:800">-1 L</button>
+      <button id="btn-sub-b" title="Minus Right Point" style="color:var(--icon-color); font-weight:800">-1 R</button>
       <button id="btn-reset" title="Reset Match">🔄</button>
     </div>
   </div>
 
-  <!-- ============ INTERACTIVE GUIDE OVERLAY ============ -->
-  <div id="guide-overlay" class="hidden">
-    <button class="close-guide-btn" id="btn-close-guide">X</button>
-    
-    <!-- Guide for Team 1 Click -->
-    <div class="guide-pointer" style="top: 30%; left: 15%;">
-      <div class="guide-text">यता थिच्दा टिम १ को स्कोर बढ्छ</div>
-      <div class="guide-arrow">↓</div>
+  <!-- ============ TIMELINE MODAL (FOOTBALL) ============ -->
+  <div id="modal-timeline" class="app-overlay hidden">
+    <div class="football-timeline">
+        <div class="timeline-title">Goal Timeline</div>
+        <div id="timeline-list">No goals yet.</div>
+        <button class="btn-primary" id="btn-close-timeline" style="margin-top:15px;">Close</button>
     </div>
-    
-    <!-- Guide for Team 2 Click -->
-    <div class="guide-pointer" style="top: 30%; right: 15%;">
-      <div class="guide-text">यता थिच्दा टिम २ को स्कोर बढ्छ</div>
-      <div class="guide-arrow">↓</div>
-    </div>
-    
-    <!-- Guide for Set Won -->
-    <div class="guide-pointer" style="top: 30%; left: 45%;">
-      <div class="guide-text">जम्मा जितेको सेट</div>
-      <div class="guide-arrow">↓</div>
-    </div>
+  </div>
 
-    <!-- Guide for Bottom Controls -->
-    <div class="guide-pointer" style="bottom: 20%; left: 40%;">
-      <div class="guide-arrow">↓</div>
-      <div class="guide-text">सेटिङ्ग, अनडु(ब्याक), पोइन्ट घटाउन र रिसेट गर्न तलको बटन थिच्नुहोस</div>
+  <!-- ============ WARNING MODAL (Careful!) ============ -->
+  <div id="modal-warning" class="app-overlay hidden">
+    <div class="box" style="text-align:center;">
+      <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+      <div class="modal-title" style="color: #ef4444;">Careful / ध्यान दिनुहोला</div>
+      <div style="font-size: 1rem; font-weight: 800; margin-bottom: 20px; line-height: 1.5;">
+        One tap adds score.<br>
+        एक पटक थिच्दा स्कोर बढ्छ।
+      </div>
+      <button class="btn-primary" id="btn-close-warning">I Understand (मैले बुझेँ)</button>
     </div>
   </div>
 
   <!-- ============ SETTINGS MODAL ============ -->
   <div id="modal-settings" class="app-overlay hidden">
     <div class="box">
-      <div class="modal-title">Match Settings</div>
-      
-      <!-- Naya Font ra Size Settings -->
-      <div class="team-inputs" style="margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px;">
+      <div class="modal-title">Settings & Font</div>
+      <div class="team-inputs" style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px;">
         <div class="field">
           <label>App Font Style</label>
           <select id="settings-font">
-            <option value="'Segoe UI', system-ui, -apple-system, sans-serif">Default (Modern)</option>
+            <option value="'Segoe UI', system-ui, -apple-system, sans-serif">Default</option>
             <option value="Arial, sans-serif">Arial</option>
             <option value="'Courier New', Courier, monospace">Courier (Typewriter)</option>
-            <option value="Georgia, serif">Georgia (Classic)</option>
             <option value="'Impact', sans-serif">Impact (Bold)</option>
           </select>
         </div>
@@ -378,13 +417,11 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
           <label>Score Font Size</label>
           <select id="settings-size">
             <option value="normal">Normal</option>
-            <option value="large" selected>Large (Default)</option>
+            <option value="large" selected>Large</option>
             <option value="xlarge">Extra Large</option>
           </select>
         </div>
       </div>
-
-
       <div class="team-inputs">
         <div class="field">
           <label>Left Team Name & Color</label>
@@ -401,15 +438,6 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
           </div>
         </div>
       </div>
-      <div class="field" style="margin-top: 10px;">
-        <label>Final Set Target Score</label>
-        <select id="settings-target">
-          <option value="15">Play to 15</option>
-          <option value="25">Play to 25</option>
-        </select>
-      </div>
-      
-      <button class="btn-ghost" id="btn-show-guide" style="border-color: #facc15; color: #facc15;">📖 App Guide Herna Click</button>
 
       <button class="btn-primary" id="btn-save-settings">Save & Resume</button>
       <button class="btn-ghost" id="btn-cancel-settings">Cancel</button>
@@ -421,7 +449,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     <div class="box" style="text-align:center;">
       <div class="modal-title" id="modal-title">Set Complete</div>
       <div style="font-size: 3.5rem; font-weight: 900; margin: 15px 0;" id="modal-score">25 – 23</div>
-      <div style="font-size: 1.2rem; font-weight: 800;" id="modal-desc">Team 1 wins the set!</div>
+      <div style="font-size: 1.2rem; font-weight: 800;" id="modal-desc">Team 1 wins!</div>
       <button class="btn-primary" id="btn-next-set">Start Next Set (Swap Sides)</button>
       <button class="btn-ghost" id="btn-undo-modal">↩ Undo Last Point</button>
     </div>
@@ -430,6 +458,43 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 </div>
 
 <script>
+// Service Worker Registration for PWA (Offline Support)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // We create a dummy service worker script via blob to make this a single file PWA
+    const swCode = `
+      self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch', e => {
+        e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
+      });
+    `;
+    const blob = new Blob([swCode], {type: 'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
+  });
+}
+
+// PWA Install Prompt Logic
+let deferredPrompt;
+const installBtn = document.getElementById('install-app-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block'; // Show install button
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installBtn.style.display = 'none';
+    }
+    deferredPrompt = null;
+  }
+});
+
 (function () {
   'use strict';
 
@@ -438,35 +503,37 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   document.getElementById('setup-b-name').value = localStorage.getItem('vb_teamB') || 'TEAM 2';
   document.getElementById('setup-a-color').value = localStorage.getItem('vb_colorA') || '#4ade80';
   document.getElementById('setup-b-color').value = localStorage.getItem('vb_colorB') || '#f87171';
-  document.getElementById('setup-target').value = localStorage.getItem('vb_target') || '15';
-
-  // Match History System
-  let allMatchesHistory = JSON.parse(localStorage.getItem('vb_match_history')) || [];
-
-  // App Settings (Font and Size)
+  
   let appFont = localStorage.getItem('vb_font') || "'Segoe UI', system-ui, -apple-system, sans-serif";
   let appScoreSize = localStorage.getItem('vb_size') || "large";
+  let allMatchesHistory = JSON.parse(localStorage.getItem('vb_match_history')) || [];
 
-  // State
-  let selectedFormat = 5; 
+  let sportType = 'volleyball'; 
+  let selectedFormat = 3;  
+
   let state = {
-    teamA: 'TEAM 1', teamB: 'TEAM 2', 
-    colorA: '#4ade80', colorB: '#f87171',
-    format: 5, currentSet: 1,
-    scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', status: 'setup',
+    teamA: 'TEAM 1', teamB: 'TEAM 2', colorA: '#4ade80', colorB: '#f87171',
+    format: 3, currentSet: 1, scoreA: 0, scoreB: 0, setsA: 0, setsB: 0, server: 'A', status: 'setup',
     finalTarget: 15
   };
   
   let undoStack = [];
-  let streakA = 0;
-  let streakB = 0;
+  let streakA = 0; let streakB = 0;
+  
+  // Football Specific Variables
+  let footballSeconds = 0;
+  let timerInterval = null;
+  let isTimerRunning = false;
+  let footballGoalsList = []; 
 
   const els = {
     setupScreen: document.getElementById('setup-screen'),
     appWrapper: document.getElementById('main-app-wrapper'),
     modalSet: document.getElementById('modal-set'),
     modalSettings: document.getElementById('modal-settings'),
-    guideOverlay: document.getElementById('guide-overlay'),
+    modalWarning: document.getElementById('modal-warning'),
+    modalTimeline: document.getElementById('modal-timeline'),
+    toast: document.getElementById('toast'),
     
     sideA: document.getElementById('side-a'), sideB: document.getElementById('side-b'),
     nameA: document.getElementById('name-a'), nameB: document.getElementById('name-b'),
@@ -474,41 +541,29 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     setsA: document.getElementById('sets-a'), setsB: document.getElementById('sets-b'),
     currentSet: document.getElementById('current-set-label'),
     
-    // Setup inputs
+    vbSettings: document.getElementById('vb-settings'),
+    fbSettings: document.getElementById('fb-settings'),
+    setsWonUi: document.getElementById('sets-won-ui'),
+    footballTimerUi: document.getElementById('football-timer-ui'),
+    timerInteractive: document.getElementById('timer-interactive'),
+    timelineList: document.getElementById('timeline-list'),
+    timerDisplay: document.getElementById('timer-display'),
+    timerStatus: document.getElementById('timer-status'),
+    serveIndicators: document.querySelectorAll('.vb-only'),
+    
     inputSetupA: document.getElementById('setup-a-name'),
     inputSetupB: document.getElementById('setup-b-name'),
     inputSetupColorA: document.getElementById('setup-a-color'),
     inputSetupColorB: document.getElementById('setup-b-color'),
     inputSetupTarget: document.getElementById('setup-target'),
     
-    // Settings inputs
     inputSettingsA: document.getElementById('settings-a-name'),
     inputSettingsB: document.getElementById('settings-b-name'),
     inputSettingsColorA: document.getElementById('settings-a-color'),
     inputSettingsColorB: document.getElementById('settings-b-color'),
-    inputSettingsTarget: document.getElementById('settings-target'),
     inputSettingsFont: document.getElementById('settings-font'),
     inputSettingsSize: document.getElementById('settings-size')
   };
-
-  // Apply Font and Size Initially
-  function applyFontAndSize() {
-      document.documentElement.style.setProperty('--app-font', appFont);
-      
-      let pcSize, mobileSize;
-      if (appScoreSize === 'normal') {
-          pcSize = '35vw'; mobileSize = '40vh';
-      } else if (appScoreSize === 'xlarge') {
-          pcSize = '55vw'; mobileSize = '60vh';
-      } else {
-          // Default large
-          pcSize = '45vw'; mobileSize = '50vh';
-      }
-
-      document.documentElement.style.setProperty('--score-size-pc', pcSize);
-      document.documentElement.style.setProperty('--score-size-mobile', mobileSize);
-  }
-  applyFontAndSize();
 
   // Setup History Toggle
   document.getElementById('btn-show-history').addEventListener('click', () => {
@@ -516,12 +571,26 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     if(allMatchesHistory.length === 0){
       container.innerHTML = "<p style='text-align:center;'>Kunai pani history chhaina.</p>";
     } else {
-      container.innerHTML = allMatchesHistory.map(m => 
-        `<div class="history-item">
-          <span>${m.teamA} vs ${m.teamB}</span>
-          <span style="color:var(--accent); font-weight:bold;">${m.setsA} - ${m.setsB}</span>
-        </div>`
-      ).join('');
+      container.innerHTML = allMatchesHistory.slice().reverse().map(m => {
+        let fbDetails = '';
+        if(m.sport === 'football' && m.goals && m.goals.length > 0) {
+            let list = m.goals.map(g => `${g.team === 'A' ? m.teamA : m.teamB} (${g.time})`).join(', ');
+            fbDetails = `<div class="fb-goal-list">Goals: ${list}</div>`;
+        } else if (m.sport === 'football') {
+            fbDetails = `<div class="fb-goal-list">No goals scored.</div>`;
+        }
+        return `
+        <div style="border-bottom: 1px solid #444; padding-bottom: 8px; margin-bottom: 8px;">
+          <div class="history-item" style="border:none; padding:0;">
+            <span>[${m.sport === 'football' ? '⚽' : '🏐'}] ${m.teamA} vs ${m.teamB}</span>
+            <span style="color:var(--accent); font-weight:bold;">
+              ${m.sport === 'football' ? m.scoreA + ' - ' + m.scoreB : m.setsA + ' - ' + m.setsB}
+            </span>
+          </div>
+          <div style="font-size: 0.7rem; color: #777;">${m.date}</div>
+          ${fbDetails}
+        </div>`;
+      }).join('');
     }
     document.getElementById('setup-history-area').classList.remove('hidden');
     document.getElementById('btn-show-history').classList.add('hidden');
@@ -532,14 +601,37 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     document.getElementById('btn-show-history').classList.remove('hidden');
   });
 
-  // Setup Format toggle
+  function applyFontAndSize() {
+      document.documentElement.style.setProperty('--app-font', appFont);
+      let pcSize, mobileSize;
+      if (appScoreSize === 'normal') { pcSize = '30vw'; mobileSize = '35vh'; } 
+      else if (appScoreSize === 'xlarge') { pcSize = '50vw'; mobileSize = '55vh'; } 
+      else { pcSize = '40vw'; mobileSize = '45vh'; }
+      document.documentElement.style.setProperty('--score-size-pc', pcSize);
+      document.documentElement.style.setProperty('--score-size-mobile', mobileSize);
+  }
+  applyFontAndSize();
+
+  document.getElementById('sport-seg').addEventListener('click', function(e) {
+    if(e.target.tagName !== 'BUTTON') return;
+    sportType = e.target.dataset.sport;
+    Array.from(this.children).forEach(b => b.classList.toggle('active', b === e.target));
+    
+    if(sportType === 'football') {
+      els.vbSettings.classList.add('hidden');
+      els.fbSettings.classList.remove('hidden');
+    } else {
+      els.vbSettings.classList.remove('hidden');
+      els.fbSettings.classList.add('hidden');
+    }
+  });
+
   document.getElementById('format-seg').addEventListener('click', function(e) {
     if(e.target.tagName !== 'BUTTON') return;
     selectedFormat = parseInt(e.target.dataset.value);
     Array.from(this.children).forEach(b => b.classList.toggle('active', b === e.target));
   });
 
-  // Start Match Logic
   document.getElementById('btn-start').addEventListener('click', () => {
     state.teamA = els.inputSetupA.value || 'TEAM 1';
     state.teamB = els.inputSetupB.value || 'TEAM 2';
@@ -548,12 +640,46 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     state.finalTarget = parseInt(els.inputSetupTarget.value);
     state.format = selectedFormat;
     state.status = 'playing';
+    
+    footballSeconds = 0;
+    isTimerRunning = false;
+    clearInterval(timerInterval);
+    footballGoalsList = [];
 
     saveData();
     els.setupScreen.classList.add('hidden');
     els.appWrapper.classList.remove('hidden');
+    
+    setupUIForSport();
     render();
+    
+    els.modalWarning.classList.remove('hidden');
   });
+
+  document.getElementById('btn-close-warning').addEventListener('click', () => {
+      els.modalWarning.classList.add('hidden');
+  });
+
+  document.getElementById('btn-top-back').addEventListener('click', () => {
+      if(confirm('Are you sure you want to go back? Current match will be saved to history.')) {
+          saveMatchHistory();
+          goToSetup();
+      }
+  });
+
+  function setupUIForSport() {
+    if(sportType === 'football') {
+      els.setsWonUi.classList.add('hidden');
+      els.footballTimerUi.classList.remove('hidden');
+      els.serveIndicators.forEach(el => el.classList.add('hidden'));
+      document.body.classList.add('sport-football');
+    } else {
+      els.setsWonUi.classList.remove('hidden');
+      els.footballTimerUi.classList.add('hidden');
+      els.serveIndicators.forEach(el => el.classList.remove('hidden'));
+      document.body.classList.remove('sport-football');
+    }
+  }
 
   function targetScore() { return state.currentSet === state.format ? state.finalTarget : 25; }
   function setsNeeded() { return Math.ceil(state.format / 2); }
@@ -563,15 +689,15 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     localStorage.setItem('vb_teamB', state.teamB);
     localStorage.setItem('vb_colorA', state.colorA);
     localStorage.setItem('vb_colorB', state.colorB);
-    localStorage.setItem('vb_target', state.finalTarget);
-    localStorage.setItem('vb_font', appFont);
-    localStorage.setItem('vb_size', appScoreSize);
   }
 
   function saveMatchHistory() {
     allMatchesHistory.push({
+      sport: sportType,
       teamA: state.teamA, teamB: state.teamB,
+      scoreA: state.scoreA, scoreB: state.scoreB,
       setsA: state.setsA, setsB: state.setsB,
+      goals: sportType === 'football' ? JSON.parse(JSON.stringify(footballGoalsList)) : null,
       date: new Date().toLocaleString()
     });
     if(allMatchesHistory.length > 20) allMatchesHistory.shift();
@@ -582,58 +708,170 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     document.documentElement.style.setProperty('--bg-left', state.colorA);
     document.documentElement.style.setProperty('--bg-right', state.colorB);
 
-    let glowA = Math.min(streakA * 8, 40);
-    let glowB = Math.min(streakB * 8, 40);
-    els.scoreA.style.setProperty('--streak-glow-a', glowA + 'px');
-    els.scoreB.style.setProperty('--streak-glow-b', glowB + 'px');
+    if (sportType === 'volleyball') {
+      let glowA = Math.min(streakA * 8, 40); let glowB = Math.min(streakB * 8, 40);
+      els.scoreA.style.setProperty('--streak-glow-a', glowA + 'px');
+      els.scoreB.style.setProperty('--streak-glow-b', glowB + 'px');
+    } else {
+      els.scoreA.style.setProperty('--streak-glow-a', '0px');
+      els.scoreB.style.setProperty('--streak-glow-b', '0px');
+    }
   }
 
   function pushUndo() {
-    undoStack.push(JSON.parse(JSON.stringify(state)));
+    undoStack.push({
+        state: JSON.parse(JSON.stringify(state)),
+        footballGoalsList: JSON.parse(JSON.stringify(footballGoalsList))
+    });
     if (undoStack.length > 50) undoStack.shift();
   }
 
   function undo() {
     if (undoStack.length === 0) return;
-    state = undoStack.pop();
+    let last = undoStack.pop();
+    state = last.state;
+    footballGoalsList = last.footballGoalsList;
     streakA = 0; streakB = 0; 
     els.modalSet.classList.add('hidden');
     render();
   }
 
+  function formatTime(totalSeconds) {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function showToast(msg) {
+      els.toast.textContent = msg;
+      els.toast.style.opacity = 1;
+      setTimeout(() => els.toast.style.opacity = 0, 2000);
+  }
+
+  // Football Timer Play/Pause
+  els.timerInteractive.addEventListener('click', () => {
+    if(isTimerRunning) {
+      clearInterval(timerInterval);
+      els.timerStatus.textContent = "PAUSED";
+      els.timerStatus.style.color = "#f87171";
+    } else {
+      timerInterval = setInterval(() => {
+        footballSeconds++;
+        els.timerDisplay.textContent = formatTime(footballSeconds);
+      }, 1000);
+      els.timerStatus.textContent = "PLAYING";
+      els.timerStatus.style.color = "#4ade80";
+    }
+    isTimerRunning = !isTimerRunning;
+  });
+
+  // End Half Button Logic for Football
+  document.getElementById('btn-end-half').addEventListener('click', () => {
+      if(confirm("Are you sure you want to end this half? Sides will be swapped.")) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          
+          let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
+          let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
+          let tempScore = state.scoreA; state.scoreA = state.scoreB; state.scoreB = tempScore;
+          
+          state.currentSet++; 
+          render();
+      }
+  });
+
+
+  // Timeline Button Logic
+  document.getElementById('btn-timeline').addEventListener('click', () => {
+      if(footballGoalsList.length === 0) {
+          els.timelineList.innerHTML = '<div style="padding:10px;">No goals yet.</div>';
+      } else {
+          els.timelineList.innerHTML = footballGoalsList.map(g => 
+              `<div class="timeline-entry">
+                  <span style="color:${g.team === 'A' ? state.colorA : state.colorB}; font-weight:bold;">
+                    ⚽ ${g.team === 'A' ? state.teamA : state.teamB}
+                  </span>
+                  <span>${g.time}</span>
+              </div>`
+          ).join('');
+      }
+      els.modalTimeline.classList.remove('hidden');
+  });
+
+  document.getElementById('btn-close-timeline').addEventListener('click', () => {
+      els.modalTimeline.classList.add('hidden');
+  });
+
+
   function render() {
     els.nameA.textContent = state.teamA; els.nameB.textContent = state.teamB;
     els.scoreA.textContent = state.scoreA; els.scoreB.textContent = state.scoreB;
-    els.setsA.textContent = state.setsA; els.setsB.textContent = state.setsB;
     
-    // Shows only SET 1 etc.
-    els.currentSet.textContent = state.currentSet === state.format ? 'FINAL SET' : 'SET ' + state.currentSet;
-    
-    els.sideA.classList.toggle('serving', state.server === 'A');
-    els.sideB.classList.toggle('serving', state.server === 'B');
+    if(sportType === 'volleyball') {
+      els.setsA.textContent = state.setsA; els.setsB.textContent = state.setsB;
+      els.currentSet.textContent = state.currentSet === state.format ? 'FINAL SET' : 'SET ' + state.currentSet;
+      els.sideA.classList.toggle('serving', state.server === 'A');
+      els.sideB.classList.toggle('serving', state.server === 'B');
+    } else {
+      els.currentSet.textContent = state.currentSet === 1 ? '1ST HALF' : (state.currentSet === 2 ? '2ND HALF' : 'EXTRA TIME');
+      els.sideA.classList.remove('serving'); els.sideB.classList.remove('serving');
+      els.timerDisplay.textContent = formatTime(footballSeconds);
+      if(!isTimerRunning) {
+          els.timerStatus.textContent = "PAUSED"; els.timerStatus.style.color = "#f87171";
+      } else {
+          els.timerStatus.textContent = "PLAYING"; els.timerStatus.style.color = "#4ade80";
+      }
+    }
 
-    // Handle double digits for font sizing
-    if (state.scoreA >= 10) els.scoreA.classList.add('double-digit');
-    else els.scoreA.classList.remove('double-digit');
-
-    if (state.scoreB >= 10) els.scoreB.classList.add('double-digit');
-    else els.scoreB.classList.remove('double-digit');
+    if (state.scoreA >= 10) els.scoreA.classList.add('double-digit'); else els.scoreA.classList.remove('double-digit');
+    if (state.scoreB >= 10) els.scoreB.classList.add('double-digit'); else els.scoreB.classList.remove('double-digit');
     
     updateVisuals();
   }
 
   function addPoint(side) {
     if (state.status !== 'playing') return;
+    
+    if(sportType === 'football' && !isTimerRunning) {
+        showToast("Timer is paused! (टाइम सुरु गर्नुहोस)");
+        return;
+    }
+
     pushUndo();
-    if (side === 'A') { state.scoreA++; state.server = 'A'; streakA++; streakB = 0; } 
-    else { state.scoreB++; state.server = 'B'; streakB++; streakA = 0; }
-    render(); checkWin();
+    if (side === 'A') { 
+        state.scoreA++; state.server = 'A'; streakA++; streakB = 0; 
+        if(sportType === 'football') footballGoalsList.push({team: 'A', time: formatTime(footballSeconds)});
+    } else { 
+        state.scoreB++; state.server = 'B'; streakB++; streakA = 0; 
+        if(sportType === 'football') footballGoalsList.push({team: 'B', time: formatTime(footballSeconds)});
+    }
+    
+    if(sportType === 'volleyball') {
+        checkWin(); 
+        render(); 
+    } else {
+        render(); 
+    }
   }
 
   function subPoint(side) {
     if (state.status !== 'playing') return;
-    if (side === 'A' && state.scoreA > 0) { pushUndo(); state.scoreA--; streakA = 0;}
-    else if (side === 'B' && state.scoreB > 0) { pushUndo(); state.scoreB--; streakB = 0;}
+    if (side === 'A' && state.scoreA > 0) { 
+        pushUndo(); state.scoreA--; streakA = 0;
+        if(sportType === 'football') {
+             for(let i = footballGoalsList.length - 1; i >= 0; i--) {
+                 if(footballGoalsList[i].team === 'A') { footballGoalsList.splice(i, 1); break; }
+             }
+        }
+    }
+    else if (side === 'B' && state.scoreB > 0) { 
+        pushUndo(); state.scoreB--; streakB = 0;
+        if(sportType === 'football') {
+             for(let i = footballGoalsList.length - 1; i >= 0; i--) {
+                 if(footballGoalsList[i].team === 'B') { footballGoalsList.splice(i, 1); break; }
+             }
+        }
+    }
     render();
   }
 
@@ -649,8 +887,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
     const matchOver = state.setsA >= setsNeeded() || state.setsB >= setsNeeded();
     if (matchOver) {
-      state.status = 'finished';
-      saveMatchHistory();
+        state.status = 'finished';
+        saveMatchHistory();
     }
 
     document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
@@ -666,14 +904,11 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
       document.getElementById('btn-next-set').onclick = startNextSet;
     }
     els.modalSet.classList.remove('hidden');
-    render();
   }
 
   function startNextSet() {
     if (state.status !== 'break') return;
     undoStack = []; 
-    
-    // Swap Teams, Colors, and Sets Won
     let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
     let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
     let tempSets = state.setsA; state.setsA = state.setsB; state.setsB = tempSets;
@@ -685,62 +920,52 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   function goToSetup() {
     state.currentSet = 1; state.scoreA = 0; state.scoreB = 0; state.setsA = 0; state.setsB = 0; 
     state.status = 'setup'; undoStack = []; streakA = 0; streakB = 0;
+    clearInterval(timerInterval); isTimerRunning = false;
+    footballGoalsList = [];
     
     els.modalSet.classList.add('hidden'); 
     els.appWrapper.classList.add('hidden');
     els.setupScreen.classList.remove('hidden');
   }
 
-  // Bind Game Clicks
-  document.getElementById('click-a').addEventListener('click', () => addPoint('A'));
-  document.getElementById('click-b').addEventListener('click', () => addPoint('B'));
+  // Bind Clicks
+  document.getElementById('click-a').addEventListener('click', (e) => { 
+      if(e.target.closest('.football-timer-center')) return;
+      addPoint('A'); 
+  });
+  document.getElementById('click-b').addEventListener('click', (e) => { 
+      if(e.target.closest('.football-timer-center')) return;
+      addPoint('B'); 
+  });
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-undo-modal').addEventListener('click', undo);
   document.getElementById('btn-sub-a').addEventListener('click', () => subPoint('A'));
   document.getElementById('btn-sub-b').addEventListener('click', () => subPoint('B'));
   document.getElementById('btn-reset').addEventListener('click', () => { 
-    if(confirm('Are you sure you want to end this match and go back to setup?')) goToSetup(); 
+    if(confirm('End match and go to setup? (Game end garne?)')) {
+        saveMatchHistory();
+        goToSetup(); 
+    }
   });
 
   // Settings Menu
   document.getElementById('btn-settings').addEventListener('click', () => {
-    els.inputSettingsA.value = state.teamA;
-    els.inputSettingsB.value = state.teamB;
-    els.inputSettingsColorA.value = state.colorA;
-    els.inputSettingsColorB.value = state.colorB;
-    els.inputSettingsTarget.value = state.finalTarget;
-    els.inputSettingsFont.value = appFont;
-    els.inputSettingsSize.value = appScoreSize;
+    els.inputSettingsA.value = state.teamA; els.inputSettingsB.value = state.teamB;
+    els.inputSettingsColorA.value = state.colorA; els.inputSettingsColorB.value = state.colorB;
+    els.inputSettingsFont.value = appFont; els.inputSettingsSize.value = appScoreSize;
     els.modalSettings.classList.remove('hidden');
   });
 
-  document.getElementById('btn-cancel-settings').addEventListener('click', () => {
-    els.modalSettings.classList.add('hidden');
-  });
+  document.getElementById('btn-cancel-settings').addEventListener('click', () => els.modalSettings.classList.add('hidden'));
 
   document.getElementById('btn-save-settings').addEventListener('click', () => {
-    state.teamA = els.inputSettingsA.value || 'TEAM 1';
-    state.teamB = els.inputSettingsB.value || 'TEAM 2';
-    state.colorA = els.inputSettingsColorA.value || '#4ade80';
-    state.colorB = els.inputSettingsColorB.value || '#f87171';
-    state.finalTarget = parseInt(els.inputSettingsTarget.value);
+    state.teamA = els.inputSettingsA.value || 'TEAM 1'; state.teamB = els.inputSettingsB.value || 'TEAM 2';
+    state.colorA = els.inputSettingsColorA.value || '#4ade80'; state.colorB = els.inputSettingsColorB.value || '#f87171';
+    appFont = els.inputSettingsFont.value; appScoreSize = els.inputSettingsSize.value;
     
-    appFont = els.inputSettingsFont.value;
-    appScoreSize = els.inputSettingsSize.value;
-
-    applyFontAndSize();
-    saveData();
+    applyFontAndSize(); saveData();
     els.modalSettings.classList.add('hidden');
     render();
-  });
-
-  // Guide overlay logic
-  document.getElementById('btn-show-guide').addEventListener('click', () => {
-    els.modalSettings.classList.add('hidden');
-    els.guideOverlay.classList.remove('hidden');
-  });
-  document.getElementById('btn-close-guide').addEventListener('click', () => {
-    els.guideOverlay.classList.add('hidden');
   });
 
 })();
