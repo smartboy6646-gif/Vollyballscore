@@ -29,6 +29,14 @@
   --score-size-mobile: 40vh; 
 }
 
+/* FULLSCREEN RESET */
+:fullscreen, ::backdrop {
+    background-color: #000;
+}
+:-webkit-full-screen {
+    background-color: #000;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body, html { 
@@ -50,7 +58,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 
 /* FORCE LANDSCAPE CSS */
 #main-app-wrapper {
-  position: absolute; top: 0; left: 0;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   width: 100vw; height: 100vh; overflow: hidden; background: #000;
   display: flex; flex-direction: column;
 }
@@ -115,7 +123,7 @@ body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
 /* Player Info Default (Volleyball) */
-.player-info { text-align: center; color: white; position: absolute; top: 5%; z-index: 5; width: 100%; }
+.player-info { text-align: center; color: white; position: absolute; top: env(safe-area-inset-top, 5%); z-index: 5; width: 100%; }
 .player-name { 
   font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
   animation: neon-pulse 1.5s infinite alternate;
@@ -668,7 +676,18 @@ installBtn.addEventListener('click', async () => {
     Array.from(this.children).forEach(b => b.classList.toggle('active', b === e.target));
   });
 
+  // START MATCH & TRIGGER FULLSCREEN
   document.getElementById('btn-start').addEventListener('click', () => {
+    // Request Fullscreen on user click
+    const docElm = document.documentElement;
+    if (docElm.requestFullscreen) {
+        docElm.requestFullscreen().catch(err => console.log(err));
+    } else if (docElm.webkitRequestFullscreen) { /* Safari */
+        docElm.webkitRequestFullscreen();
+    } else if (docElm.msRequestFullscreen) { /* IE11 */
+        docElm.msRequestFullscreen();
+    }
+
     state.teamA = els.inputSetupA.value || 'TEAM 1';
     state.teamB = els.inputSetupB.value || 'TEAM 2';
     state.colorA = els.inputSetupColorA.value || '#4ade80';
@@ -706,6 +725,14 @@ installBtn.addEventListener('click', async () => {
       if(confirm('Are you sure you want to go back? Current match will be saved to history as incomplete.')) {
           state.isComplete = false;
           saveMatchHistory();
+          
+          // Exit Fullscreen
+          if (document.exitFullscreen) {
+              document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) { /* Safari */
+              document.webkitExitFullscreen();
+          }
+          
           goToSetup();
       }
   });
@@ -836,6 +863,14 @@ installBtn.addEventListener('click', async () => {
       document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
       document.getElementById('btn-next-set').onclick = () => {
           saveMatchHistory();
+          
+          // Exit Fullscreen
+          if (document.exitFullscreen) {
+              document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) { 
+              document.webkitExitFullscreen();
+          }
+          
           goToSetup();
       };
       
@@ -1030,7 +1065,15 @@ installBtn.addEventListener('click', async () => {
     if (matchOver) {
       document.getElementById('modal-title').textContent = '🏆 MATCH OVER 🏆';
       document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
-      document.getElementById('btn-next-set').onclick = goToSetup;
+      document.getElementById('btn-next-set').onclick = () => {
+          // Exit Fullscreen
+          if (document.exitFullscreen) {
+              document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) { 
+              document.webkitExitFullscreen();
+          }
+          goToSetup();
+      };
     } else {
       document.getElementById('modal-title').textContent = 'SET ' + state.currentSet + ' COMPLETE';
       document.getElementById('btn-next-set').textContent = 'Start Next Set (Swap Sides)';
@@ -1078,6 +1121,14 @@ installBtn.addEventListener('click', async () => {
     if(confirm('End match and go to setup? (Game end garne?)')) {
         state.isComplete = false;
         saveMatchHistory();
+        
+        // Exit Fullscreen
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log(err));
+        } else if (document.webkitExitFullscreen) { 
+            document.webkitExitFullscreen();
+        }
+          
         goToSetup(); 
     }
   });
