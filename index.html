@@ -83,7 +83,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
   transition: text-shadow 0.3s ease, transform 0.1s, font-size 0.3s;
   text-align: center; max-width: 95%; white-space: nowrap; 
 }
-.player-name { font-size: 6vw; white-space: nowrap; } 
+.player-name { font-size: 4.5vw; white-space: nowrap; } /* Reduced size from 6vw to prevent overlap */
 
 @media screen and (orientation: portrait) {
   #main-app-wrapper {
@@ -91,7 +91,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
     transform: rotate(90deg); transform-origin: top left;
   }
   .score { font-size: var(--score-size-mobile); } 
-  .player-name { font-size: 6vh; }
+  .player-name { font-size: 4.5vh; } /* Reduced size */
 }
 
 .score.double-digit { font-size: calc(var(--score-size-pc) * 0.8); }
@@ -102,8 +102,8 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 /* FOOTBALL LAYOUT FIXES - CENTERED */
 body.sport-football .side-left .score-box { justify-content: center; padding-left: 0; }
 body.sport-football .side-right .score-box { justify-content: center; padding-right: 0; }
-body.sport-football .side-left .player-info { top: 5%; z-index: 20; opacity: 0.8;}
-body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.8;}
+body.sport-football .side-left .player-info { top: 2%; z-index: 20; opacity: 0.8;}
+body.sport-football .side-right .player-info { top: 2%; z-index: 20; opacity: 0.8;}
 
 /* MAIN SPLIT SCREEN APP */
 #main-app { display: flex; flex-direction: row; height: 100%; width: 100%; position: relative; }
@@ -116,14 +116,14 @@ body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.
 .side-right { background-color: var(--bg-right); }
 
 /* Serve Indicator */
-.serve-indicator { position: absolute; top: 15%; font-size: 3rem; opacity: 0; transition: 0.3s; z-index: 10;}
+.serve-indicator { position: absolute; top: 18%; font-size: 3rem; opacity: 0; transition: 0.3s; z-index: 10;}
 .side-left .serve-indicator { right: 10%; }
 .side-right .serve-indicator { left: 10%; }
 .serving .serve-indicator { opacity: 1; animation: bounce 1s infinite alternate; }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
 /* Player Info Default (Volleyball) */
-.player-info { text-align: center; color: white; position: absolute; top: env(safe-area-inset-top, 5%); z-index: 5; width: 100%; }
+.player-info { text-align: center; color: white; position: absolute; top: env(safe-area-inset-top, 15px); z-index: 5; width: 100%; }
 .player-name { 
   font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
   animation: neon-pulse 1.5s infinite alternate;
@@ -151,17 +151,16 @@ body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.
 }
 #current-set-label { font-size: 1.5rem; font-weight: 900; color: #111827; letter-spacing: 1px;}
 
-/* CENTER SETS WON (VOLLEYBALL) */
+/* CENTER SETS WON (VOLLEYBALL) - Updated to have NO background box */
 .sets-won-center {
   top: 50%; left: 50%; transform: translate(-50%, -50%);
-  flex-direction: column; padding: 10px 25px; border-radius: 20px;
-  background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 60; font-size: 2.9rem; 
+  flex-direction: column; padding: 0; border-radius: 0;
+  background: transparent; border: none; /* Removed background and border */
+  box-shadow: none; z-index: 60; font-size: 2.9rem; pointer-events: none;
 }
-.sets-won-title { font-size: 0.6em; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
+.sets-won-title { font-size: 0.6em; font-weight: 900; color: #fff; text-shadow: 0 3px 10px rgba(0,0,0,0.9); letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase;}
 .sets-won-scores { font-weight: 900; font-size: 1.2em; display: flex; gap: 15px; align-items: center;}
-.set-score-a { color: var(--bg-left); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-.set-score-b { color: var(--bg-right); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+.set-score-a, .set-score-b { color: white; text-shadow: 0 3px 15px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.5); }
 
 /* CENTER TIMER (FOOTBALL) */
 .football-timer-center {
@@ -346,7 +345,7 @@ body.sport-football .timeline-btn-only-fb { display: block; }
       <div class="sets-won-title">SETS WON</div>
       <div class="sets-won-scores">
         <span class="set-score-a" id="sets-a">0</span> 
-        <span style="color:#777">-</span> 
+        <span style="color:#fff; text-shadow: 0 3px 10px rgba(0,0,0,0.9);">-</span> 
         <span class="set-score-b" id="sets-b">0</span>
       </div>
     </div>
@@ -360,7 +359,7 @@ body.sport-football .timeline-btn-only-fb { display: block; }
           <div class="timer-hint">Tap to Play/Pause</div>
       </div>
       
-      <!-- New Extra Time Button -->
+      <!-- Extra Time Button -->
       <button id="btn-extra-time" style="margin-top: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; width: 100%;">+ Add Extra Time</button>
       
       <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%;">
@@ -395,6 +394,8 @@ body.sport-football .timeline-btn-only-fb { display: block; }
     <div class="floating-pill bottom-controls" id="bottom-ui">
       <button id="btn-settings" title="Settings">⚙️</button>
       <button id="btn-undo" title="Undo">↩</button>
+      <!-- New Swap Sides Button -->
+      <button id="btn-swap-sides" class="vb-only" title="Swap Sides Manually">🔁</button> 
       <button id="btn-timeline" class="timeline-btn-only-fb" title="Goal Timeline">⏱️</button>
       <button id="btn-sub-a" title="Minus Left Point" style="color:var(--icon-color); font-weight:800">-1 L</button>
       <button id="btn-sub-b" title="Minus Right Point" style="color:var(--icon-color); font-weight:800">-1 R</button>
@@ -573,7 +574,8 @@ installBtn.addEventListener('click', async () => {
     timelineList: document.getElementById('timeline-list'),
     timerDisplay: document.getElementById('timer-display'),
     timerStatus: document.getElementById('timer-status'),
-    serveIndicators: document.querySelectorAll('.vb-only'),
+    
+    vbOnlyEls: document.querySelectorAll('.vb-only'),
     
     inputSetupA: document.getElementById('setup-a-name'),
     inputSetupB: document.getElementById('setup-b-name'),
@@ -741,12 +743,12 @@ installBtn.addEventListener('click', async () => {
     if(sportType === 'football') {
       els.setsWonUi.classList.add('hidden');
       els.footballTimerUi.classList.remove('hidden');
-      els.serveIndicators.forEach(el => el.classList.add('hidden'));
+      els.vbOnlyEls.forEach(el => el.classList.add('hidden'));
       document.body.classList.add('sport-football');
     } else {
       els.setsWonUi.classList.remove('hidden');
       els.footballTimerUi.classList.add('hidden');
-      els.serveIndicators.forEach(el => el.classList.remove('hidden'));
+      els.vbOnlyEls.forEach(el => el.classList.remove('hidden'));
       document.body.classList.remove('sport-football');
     }
   }
@@ -796,7 +798,9 @@ installBtn.addEventListener('click', async () => {
   function pushUndo() {
     undoStack.push({
         state: JSON.parse(JSON.stringify(state)),
-        footballGoalsList: JSON.parse(JSON.stringify(footballGoalsList))
+        footballGoalsList: JSON.parse(JSON.stringify(footballGoalsList)),
+        streakA: streakA,
+        streakB: streakB
     });
     if (undoStack.length > 50) undoStack.shift();
   }
@@ -806,7 +810,8 @@ installBtn.addEventListener('click', async () => {
     let last = undoStack.pop();
     state = last.state;
     footballGoalsList = last.footballGoalsList;
-    streakA = 0; streakB = 0; 
+    streakA = last.streakA || 0; 
+    streakB = last.streakB || 0; 
     els.modalSet.classList.add('hidden');
     render();
   }
@@ -1113,8 +1118,29 @@ installBtn.addEventListener('click', async () => {
       if(e.target.closest('.football-timer-center')) return;
       addPoint('B'); 
   });
+  
+  // Undo Button
   document.getElementById('btn-undo').addEventListener('click', undo);
   document.getElementById('btn-undo-modal').addEventListener('click', undo);
+  
+  // Manual Swap Sides Button
+  document.getElementById('btn-swap-sides').addEventListener('click', () => {
+      if(confirm('Swap sides manually? (Teams haru swap garne?)')) {
+          pushUndo();
+          let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
+          let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
+          let tempScore = state.scoreA; state.scoreA = state.scoreB; state.scoreB = tempScore;
+          let tempSets = state.setsA; state.setsA = state.setsB; state.setsB = tempSets;
+          let tempStreak = streakA; streakA = streakB; streakB = tempStreak;
+          
+          if(state.server === 'A') state.server = 'B';
+          else if (state.server === 'B') state.server = 'A';
+          
+          render();
+          showToast("Sides swapped!");
+      }
+  });
+
   document.getElementById('btn-sub-a').addEventListener('click', () => subPoint('A'));
   document.getElementById('btn-sub-b').addEventListener('click', () => subPoint('B'));
   document.getElementById('btn-reset').addEventListener('click', () => { 
