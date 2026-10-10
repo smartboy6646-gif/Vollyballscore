@@ -13,8 +13,6 @@
 <link rel="apple-touch-icon" href="app-icon.PNG">
 <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Pro%20Scoreboard%22%2C%22short_name%22%3A%22Scoreboard%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23111827%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22app-icon.PNG%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%2C%7B%22src%22%3A%22your-photo.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D'>
 
-
-
 <style>
 :root {
   --bg-left: #4ade80; 
@@ -27,8 +25,8 @@
   --streak-glow-a: 0px;
   --streak-glow-b: 0px;
   --app-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --score-size-pc: 35vw; /* Adjusted for better centering */
-  --score-size-mobile: 40vh; /* Adjusted for better centering */
+  --score-size-pc: 35vw; 
+  --score-size-mobile: 40vh; 
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -47,7 +45,7 @@ button { font-family: inherit; cursor: pointer; outline: none; border: 0; backgr
 #install-app-btn {
   background: #10b981; color: white; padding: 10px 20px; border-radius: 12px;
   font-weight: bold; margin-bottom: 15px; width: 100%; text-transform: uppercase;
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); display: none; /* Hidden by default */
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); display: none; 
 }
 
 /* FORCE LANDSCAPE CSS */
@@ -160,9 +158,10 @@ body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.
 /* CENTER TIMER (FOOTBALL) */
 .football-timer-center {
   top: 50%; left: 50%; transform: translate(-50%, -50%);
-  flex-direction: column; padding: 15px 35px; border-radius: 25px;
+  flex-direction: column; padding: 15px 25px; border-radius: 25px;
   background: rgba(0,0,0,0.9); color: white; border: 2px solid var(--accent);
   box-shadow: 0 0 20px rgba(34, 211, 167, 0.5); z-index: 60; 
+  width: auto; min-width: 280px;
 }
 .timer-interactive { cursor: pointer; display: flex; flex-direction: column; align-items: center;}
 .timer-title { font-size: 1rem; font-weight: 800; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; text-align: center;}
@@ -171,7 +170,7 @@ body.sport-football .side-right .player-info { top: 5%; z-index: 20; opacity: 0.
 .timer-interactive:active { transform: scale(0.95); }
 
 #btn-end-half {
-    margin-top: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
     color: white; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;
 }
 #btn-end-half:active { background: rgba(255,255,255,0.3); }
@@ -313,7 +312,8 @@ body.sport-football .timeline-btn-only-fb { display: block; }
     <div id="fb-settings" class="hidden">
       <div class="field" style="margin-top: 10px;">
         <label>Half Duration (Minutes)</label>
-        <input type="number" id="setup-fb-time" value="45" min="1" max="90">
+        <!-- Default set to 10 for Futsal -->
+        <input type="number" id="setup-fb-time" value="10" min="1" max="90">
       </div>
     </div>
 
@@ -348,10 +348,17 @@ body.sport-football .timeline-btn-only-fb { display: block; }
       <div class="timer-interactive" id="timer-interactive">
           <div class="timer-title" id="timer-status">PAUSED</div>
           <div class="timer-clock" id="timer-display">00:00</div>
+          <div class="timer-hint" id="timer-target-hint" style="color:var(--accent); font-weight:bold; margin-bottom:5px;">Target: 10:00</div>
           <div class="timer-hint">Tap to Play/Pause</div>
       </div>
-      <button id="btn-end-half">End Half</button>
-      <button id="btn-end-match" style="margin-top: 5px; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">End Match</button>
+      
+      <!-- New Extra Time Button -->
+      <button id="btn-extra-time" style="margin-top: 10px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.5); color: #60a5fa; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; width: 100%;">+ Add Extra Time</button>
+      
+      <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%;">
+          <button id="btn-end-half" style="flex: 1;">End Half</button>
+          <button id="btn-end-match" style="flex: 1; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #f87171; padding: 5px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">End Match</button>
+      </div>
     </div>
     
     <!-- Left Side -->
@@ -471,7 +478,6 @@ body.sport-football .timeline-btn-only-fb { display: block; }
 // Service Worker Registration for PWA (Offline Support)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // We create a dummy service worker script via blob to make this a single file PWA
     const swCode = `
       self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
       self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
@@ -484,14 +490,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// PWA Install Prompt Logic
 let deferredPrompt;
 const installBtn = document.getElementById('install-app-btn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  installBtn.style.display = 'block'; // Show install button
+  installBtn.style.display = 'block'; 
 });
 
 installBtn.addEventListener('click', async () => {
@@ -532,6 +537,7 @@ installBtn.addEventListener('click', async () => {
   
   // Football Specific Variables
   let footballSeconds = 0;
+  let targetFootballSeconds = 600; // 10 minutes default
   let timerInterval = null;
   let isTimerRunning = false;
   let footballGoalsList = []; 
@@ -676,6 +682,11 @@ installBtn.addEventListener('click', async () => {
     isTimerRunning = false;
     clearInterval(timerInterval);
     footballGoalsList = [];
+    
+    // Set Target Time for Football
+    let fbMins = parseInt(document.getElementById('setup-fb-time').value) || 10;
+    targetFootballSeconds = fbMins * 60;
+    document.getElementById('timer-target-hint').textContent = `Target: ${formatTime(targetFootballSeconds)}`;
 
     saveData();
     els.setupScreen.classList.add('hidden');
@@ -724,9 +735,8 @@ installBtn.addEventListener('click', async () => {
   }
 
   function saveMatchHistory() {
-    // Only save if there was some action (score > 0 or sets > 0 or goals scored)
     if(state.scoreA === 0 && state.scoreB === 0 && state.setsA === 0 && state.setsB === 0 && footballGoalsList.length === 0 && state.currentSet === 1) {
-        return; // Don't save completely empty matches
+        return; 
     }
       
     allMatchesHistory.push({
@@ -738,7 +748,7 @@ installBtn.addEventListener('click', async () => {
       date: new Date().toLocaleString(),
       isComplete: state.isComplete
     });
-    if(allMatchesHistory.length > 30) allMatchesHistory.shift(); // Keep last 30
+    if(allMatchesHistory.length > 30) allMatchesHistory.shift(); 
     localStorage.setItem('vb_match_history', JSON.stringify(allMatchesHistory));
   }
 
@@ -786,7 +796,53 @@ installBtn.addEventListener('click', async () => {
       setTimeout(() => els.toast.style.opacity = 0, 2000);
   }
 
-  // Football Timer Play/Pause
+  // Auto-End Handlers for Football
+  function executeEndHalf(isAuto = false) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      
+      let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
+      let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
+      let tempScore = state.scoreA; state.scoreA = state.scoreB; state.scoreB = tempScore;
+      
+      state.currentSet++; 
+      footballSeconds = 0; // Futsal: Reset timer for 2nd half
+      
+      let fbMins = parseInt(document.getElementById('setup-fb-time').value) || 10;
+      targetFootballSeconds = fbMins * 60;
+      document.getElementById('timer-target-hint').textContent = `Target: ${formatTime(targetFootballSeconds)}`;
+      
+      render();
+  }
+
+  function executeEndMatch() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      state.status = 'finished';
+      state.isComplete = true;
+      
+      let aWin = state.scoreA > state.scoreB;
+      let bWin = state.scoreB > state.scoreA;
+      let draw = state.scoreA === state.scoreB;
+      
+      document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
+      if(draw) {
+          document.getElementById('modal-desc').textContent = `Match Drawn!`;
+      } else {
+          document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins!`;
+      }
+      
+      document.getElementById('modal-title').textContent = '⚽ FULL TIME ⚽';
+      document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
+      document.getElementById('btn-next-set').onclick = () => {
+          saveMatchHistory();
+          goToSetup();
+      };
+      
+      els.modalSet.classList.remove('hidden');
+  }
+
+  // Football Timer Play/Pause & Auto-Stop functionality
   els.timerInteractive.addEventListener('click', () => {
     if(isTimerRunning) {
       clearInterval(timerInterval);
@@ -796,6 +852,25 @@ installBtn.addEventListener('click', async () => {
       timerInterval = setInterval(() => {
         footballSeconds++;
         els.timerDisplay.textContent = formatTime(footballSeconds);
+        
+        // AUTO END CHECK
+        if(footballSeconds >= targetFootballSeconds) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            els.timerStatus.textContent = "TIME UP!";
+            els.timerStatus.style.color = "#ef4444";
+            render();
+            
+            setTimeout(() => {
+                if (state.currentSet === 1) {
+                    alert("⏰ Half Time! The first half has ended automatically. Sides will be swapped.");
+                    executeEndHalf(true);
+                } else {
+                    alert("⏰ Full Time! The match has ended automatically.");
+                    executeEndMatch();
+                }
+            }, 100);
+        }
       }, 1000);
       els.timerStatus.textContent = "PLAYING";
       els.timerStatus.style.color = "#4ade80";
@@ -803,51 +878,36 @@ installBtn.addEventListener('click', async () => {
     isTimerRunning = !isTimerRunning;
   });
 
-  // End Half Button Logic for Football
-  document.getElementById('btn-end-half').addEventListener('click', () => {
-      if(confirm("Are you sure you want to end this half? Sides will be swapped.")) {
-          clearInterval(timerInterval);
-          isTimerRunning = false;
-          
-          let tempTeam = state.teamA; state.teamA = state.teamB; state.teamB = tempTeam;
-          let tempColor = state.colorA; state.colorA = state.colorB; state.colorB = tempColor;
-          let tempScore = state.scoreA; state.scoreA = state.scoreB; state.scoreB = tempScore;
-          
-          state.currentSet++; 
-          render();
-      }
-  });
-  
-  // End Match Button Logic for Football
-  document.getElementById('btn-end-match').addEventListener('click', () => {
-      if(confirm("End the football match now?")) {
-          clearInterval(timerInterval);
-          isTimerRunning = false;
-          state.status = 'finished';
-          state.isComplete = true;
-          
-          let aWin = state.scoreA > state.scoreB;
-          let bWin = state.scoreB > state.scoreA;
-          let draw = state.scoreA === state.scoreB;
-          
-          document.getElementById('modal-score').textContent = `${state.scoreA} – ${state.scoreB}`;
-          if(draw) {
-              document.getElementById('modal-desc').textContent = `Match Drawn!`;
-          } else {
-              document.getElementById('modal-desc').textContent = `${aWin ? state.teamA : state.teamB} wins!`;
+  // Extra Time Button Logic
+  document.getElementById('btn-extra-time').addEventListener('click', () => {
+      let extra = prompt("Enter extra time to add (in minutes):", "1");
+      if(extra !== null) {
+          let extraMins = parseInt(extra);
+          if(!isNaN(extraMins) && extraMins > 0) {
+              targetFootballSeconds += (extraMins * 60);
+              document.getElementById('timer-target-hint').textContent = `Target: ${formatTime(targetFootballSeconds)}`;
+              showToast(`+${extraMins} mins added!`);
+              
+              if(!isTimerRunning && footballSeconds < targetFootballSeconds) {
+                  els.timerStatus.textContent = "PAUSED";
+                  els.timerStatus.style.color = "#f87171";
+              }
           }
-          
-          document.getElementById('modal-title').textContent = '⚽ FULL TIME ⚽';
-          document.getElementById('btn-next-set').textContent = 'Main Menu (Reset)';
-          document.getElementById('btn-next-set').onclick = () => {
-              saveMatchHistory();
-              goToSetup();
-          };
-          
-          els.modalSet.classList.remove('hidden');
       }
   });
 
+  // End Half / End Match Buttons
+  document.getElementById('btn-end-half').addEventListener('click', () => {
+      if(confirm("Are you sure you want to end this half? Sides will be swapped.")) {
+          executeEndHalf();
+      }
+  });
+  
+  document.getElementById('btn-end-match').addEventListener('click', () => {
+      if(confirm("End the football match now?")) {
+          executeEndMatch();
+      }
+  });
 
   // Timeline Button Logic
   document.getElementById('btn-timeline').addEventListener('click', () => {
@@ -885,7 +945,11 @@ installBtn.addEventListener('click', async () => {
       els.sideA.classList.remove('serving'); els.sideB.classList.remove('serving');
       els.timerDisplay.textContent = formatTime(footballSeconds);
       if(!isTimerRunning) {
-          els.timerStatus.textContent = "PAUSED"; els.timerStatus.style.color = "#f87171";
+          if (footballSeconds >= targetFootballSeconds) {
+              els.timerStatus.textContent = "TIME UP!"; els.timerStatus.style.color = "#ef4444";
+          } else {
+              els.timerStatus.textContent = "PAUSED"; els.timerStatus.style.color = "#f87171";
+          }
       } else {
           els.timerStatus.textContent = "PLAYING"; els.timerStatus.style.color = "#4ade80";
       }
